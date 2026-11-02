@@ -16,7 +16,7 @@ import { Typography } from '../../../core/theme/typography';
 import { SlideUpTransition } from '../../../core/animations/SlideUpTransition';
 import { useTheme } from '../../../core/theme/themeStore';
 
-const cleanerHeroImg = require('../../../../assets/cleaner-hero-clean.png');
+const cleanerHeroImg = require('../../../../assets/cleaner-woman.png');
 
 export interface ServiceProviderDetailProps {
   id?: string;
@@ -57,6 +57,10 @@ export const ServiceProviderDetail: React.FC<ServiceProviderDetailProps> = ({
       }
     }
   };
+
+  const formattedHourly = hourlyRate
+    ? hourlyRate.replace(/\/hr|\/Hr|\/week|\/Week/i, '').trim()
+    : '$32.00';
 
   const imageSource =
     imageUrl && typeof imageUrl === 'string' && imageUrl.trim().length > 0
@@ -212,7 +216,7 @@ export const ServiceProviderDetail: React.FC<ServiceProviderDetailProps> = ({
           {/* Hourly Rate Pill: $32.00/hr */}
           <View style={[styles.hourlyRatePill, { backgroundColor: isDark ? colors.surface : '#F1F5F9' }]}>
             <Text style={[styles.hourlyAmountText, { color: isDark ? colors.textPrimary : '#0F172A' }]}>
-              {hourlyRate}
+              {formattedHourly}
             </Text>
             <Text style={styles.hourlyUnitText}>/hr</Text>
           </View>
@@ -350,8 +354,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cleanerPhoto: {
-    width: '100%',
-    height: '100%',
+    width: 165,
+    height: 220,
     marginBottom: -2,
   },
 
