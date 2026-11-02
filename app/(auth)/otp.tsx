@@ -87,7 +87,12 @@ export default function OtpVerificationScreen() {
                 </ScrubberItem>
 
                 <ScrubberItem index={2} slideDistance={22}>
-                  <OtpInput value={otp} onChange={setOtp} length={4} />
+                  <OtpInput
+                    value={otp}
+                    onChange={setOtp}
+                    length={4}
+                    borderColor="rgb(24, 177, 37)"
+                  />
 
                   {error ? <Text style={styles.errorText}>{error}</Text> : null}
                 </ScrubberItem>

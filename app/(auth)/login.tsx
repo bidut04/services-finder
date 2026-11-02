@@ -71,7 +71,7 @@ export default function LoginScreen() {
               <View style={styles.content}>
                 <ScrubberItem index={1} slideDistance={18}>
                   <View style={styles.iconCircle}>
-                    <Ionicons name="shield-checkmark" size={32} color={Colors.primary} />
+                    <Ionicons name="shield-checkmark" size={32} color={Colors.navy} />
                   </View>
 
                   <Text style={styles.title}>Welcome to HelpNear</Text>

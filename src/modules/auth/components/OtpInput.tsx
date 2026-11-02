@@ -16,6 +16,7 @@ export interface OtpInputProps {
   length?: number;
   onChange: (otp: string) => void;
   style?: StyleProp<ViewStyle>;
+  borderColor?: string;
 }
 
 type TextInputRef = React.ElementRef<typeof TextInput>;
@@ -25,6 +26,7 @@ export const OtpInput: React.FC<OtpInputProps> = ({
   length = 4,
   onChange,
   style,
+  borderColor = 'rgb(24, 177, 37)',
 }) => {
   const inputsRef = useRef<(TextInputRef | null)[]>([]);
 
@@ -64,8 +66,9 @@ export const OtpInput: React.FC<OtpInputProps> = ({
             }}
             style={[
               styles.box,
-              char ? styles.boxFilled : null,
-              isFocused ? styles.boxActive : null,
+              { borderColor },
+              char ? [styles.boxFilled, { borderColor }] : null,
+              isFocused ? [styles.boxActive, { borderColor }] : null,
             ]}
             keyboardType="number-pad"
             maxLength={1}
@@ -92,17 +95,23 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: Spacing.radiusMd,
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: 'rgb(24, 177, 37)',
     backgroundColor: '#FFFFFF',
     textAlign: 'center',
     ...Typography.hero,
     color: Colors.textPrimary,
   },
   boxFilled: {
-    borderColor: Colors.primaryLight,
-    backgroundColor: Colors.primaryBackground,
+    borderColor: 'rgb(24, 177, 37)',
+    backgroundColor: 'rgba(24, 177, 37, 0.05)',
   },
   boxActive: {
-    borderColor: Colors.primary,
+    borderColor: 'rgb(24, 177, 37)',
+    borderWidth: 2,
+    shadowColor: 'rgb(24, 177, 37)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
   },
 });
