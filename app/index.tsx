@@ -25,6 +25,15 @@ import { ThemeSwitcher } from '../src/core/components/ThemeSwitcher';
 
 const { width, height } = Dimensions.get('window');
 
+// Responsive sizing for the hero section:
+// Container max width is 480 (for tablets/web desktop)
+const containerWidth = Math.min(width, 480);
+const heroWidth = containerWidth;
+// Aspect ratio of assets/technician-hero.png is 896 / 1200 = 0.7466
+const HERO_ASPECT_RATIO = 896 / 1200;
+// Full natural height without any letterbox:
+const heroHeight = Math.min(heroWidth / HERO_ASPECT_RATIO, height * 0.64);
+
 const technicianImg = require('../assets/technician-hero.png');
 
 export default function WelcomeScreen() {
@@ -45,6 +54,47 @@ export default function WelcomeScreen() {
   const screenScale = useRef(
     new Animated.Value(reduceMotion ? 1 : 1.04)
   ).current;
+
+  // Real-time interactive drag progress (0 -> 1)
+  const dragProgress = useRef(new Animated.Value(0)).current;
+
+  // Real-time interactive deep slide-to-fade linked 1:1 to drag progress (0 -> 1)
+  const dragOpacity = dragProgress.interpolate({
+    inputRange: [0, 0.85, 1],
+    outputRange: [1, 0.15, 0],
+    extrapolate: 'clamp',
+  });
+  const dragTranslateY = dragProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -72],
+    extrapolate: 'clamp',
+  });
+  const dragScale = dragProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0.93],
+    extrapolate: 'clamp',
+  });
+
+  // Combine entrance mount animation with interactive drag progress
+  const activeOpacity = Animated.multiply(screenOpacity, dragOpacity);
+  const activeTranslateY = Animated.add(screenTranslateY, dragTranslateY);
+  const activeScale = Animated.multiply(screenScale, dragScale);
+
+  // Sync real-time drag progress with web GSAP on desktop browsers
+  useEffect(() => {
+    if (Platform.OS === 'web' && screenRef.current) {
+      const sub = dragProgress.addListener(({ value }) => {
+        try {
+          gsap.set(screenRef.current, {
+            opacity: Math.max(0, 1 - value),
+            y: -value * 72,
+            scale: 1 - value * 0.07,
+          });
+        } catch {}
+      });
+      return () => dragProgress.removeListener(sub);
+    }
+  }, [dragProgress]);
 
   // Mount entrance animation
   useEffect(() => {
@@ -80,19 +130,19 @@ export default function WelcomeScreen() {
         toValue: 0,
         duration: 720,
         easing: GsapEasings.power3Out,
-        useNativeDriver: Platform.OS !== 'web',
+        useNativeDriver: false,
       }),
       Animated.timing(screenOpacity, {
         toValue: 1,
         duration: 650,
         easing: GsapEasings.power3Out,
-        useNativeDriver: Platform.OS !== 'web',
+        useNativeDriver: false,
       }),
       Animated.timing(screenScale, {
         toValue: 1,
         duration: 720,
         easing: GsapEasings.power3Out,
-        useNativeDriver: Platform.OS !== 'web',
+        useNativeDriver: false,
       }),
     ]).start();
   }, [reduceMotion, screenTranslateY, screenOpacity, screenScale]);
@@ -110,39 +160,31 @@ export default function WelcomeScreen() {
           y: -72,
           opacity: 0,
           scale: 0.93,
-          duration: 0.48,
+          duration: 0.35,
           ease: 'power3.in',
         });
-      } catch { }
+      } catch {}
     }
 
-    // Native Animated: deep slide to fade with power3In (480ms, translateY: -72, scale: 0.93)
-    Animated.parallel([
-      Animated.timing(screenTranslateY, {
-        toValue: -72,
-        duration: 480,
-        easing: GsapEasings.power3In,
-        useNativeDriver: Platform.OS !== 'web',
-      }),
-      Animated.timing(screenOpacity, {
-        toValue: 0,
-        duration: 460,
-        easing: GsapEasings.power3In,
-        useNativeDriver: Platform.OS !== 'web',
-      }),
-      Animated.timing(screenScale, {
-        toValue: 0.93,
-        duration: 480,
-        easing: GsapEasings.power3In,
-        useNativeDriver: Platform.OS !== 'web',
-      }),
-    ]).start(() => {
+    // Native Animated: complete deep slide to fade with power3In
+    Animated.timing(dragProgress, {
+      toValue: 1,
+      duration: 260,
+      easing: GsapEasings.power3In,
+      useNativeDriver: false,
+    }).start(() => {
       router.push('/(auth)/login');
       // Reset transition state for when the user navigates back
       setTimeout(() => {
+        dragProgress.setValue(0);
         screenTranslateY.setValue(0);
         screenOpacity.setValue(1);
         screenScale.setValue(1);
+        if (Platform.OS === 'web' && screenRef.current) {
+          try {
+            gsap.set(screenRef.current, { opacity: 1, y: 0, scale: 1 });
+          } catch {}
+        }
       }, 600);
     });
   };
@@ -156,15 +198,15 @@ export default function WelcomeScreen() {
           styles.container,
           {
             backgroundColor: colors.background,
-            opacity: screenOpacity,
+            opacity: activeOpacity,
             transform: [
-              { translateY: screenTranslateY },
-              { scale: screenScale },
+              { translateY: activeTranslateY },
+              { scale: activeScale },
             ],
           },
         ]}
       >
-        <SafeAreaView edges={['top']} style={styles.contentContainer}>
+        <SafeAreaView edges={['top']} style={styles.topSafeArea}>
           {/* 1. Header Bar: CS Logo + Brand Name + Theme Switcher */}
           <SlideUpTransition preset="fade-slide" delayMs={60} durationMs={500} style={styles.headerRow}>
             <View style={styles.headerInnerRow}>
@@ -198,101 +240,101 @@ export default function WelcomeScreen() {
               </Text>
             </SlideUpTransition>
           </View>
+        </SafeAreaView>
 
-          {/* 3. Center Section: Technician Image + Curved Trail + Floating Metric Cards */}
-          <View style={styles.technicianSection}>
-            {/* Background Organic Blue Curved Shape */}
-            <View style={styles.organicBlueWave} pointerEvents="none" />
+        {/* 3. Center Section: Technician Image + Curved Trail + Floating Metric Cards */}
+        <View style={styles.technicianSection}>
+          {/* Background Organic Blue Curved Shape */}
+          <View style={styles.organicBlueWave} pointerEvents="none" />
 
-            {/* Dashed Loop Trajectory Pathway with Arrow */}
-            <View style={styles.dashedLoopWrap} pointerEvents="none">
-              <View style={styles.dashedLoopCurve} />
-              <View style={styles.arrowPointer}>
-                <Ionicons name="arrow-up" size={16} color="#DC7552" style={{ transform: [{ rotate: '45deg' }] }} />
+          {/* Dashed Loop Trajectory Pathway with Arrow */}
+          <View style={styles.dashedLoopWrap} pointerEvents="none">
+            <View style={styles.dashedLoopCurve} />
+            <View style={styles.arrowPointer}>
+              <Ionicons name="arrow-up" size={16} color="#DC7552" style={{ transform: [{ rotate: '45deg' }] }} />
+            </View>
+          </View>
+
+          {/* Technician Hero Photo - Full-screen edge-to-edge */}
+          <SlideUpTransition
+            preset="hero-reveal"
+            delayMs={160}
+            durationMs={850}
+            style={styles.technicianImageWrapper}
+          >
+            <Image
+              source={technicianImg}
+              style={styles.technicianImage}
+              resizeMode="contain"
+            />
+          </SlideUpTransition>
+
+          {/* Floating Metric Card 1: 25+ Service Category (Top Left) */}
+          <SlideUpTransition
+            preset="smooth-reveal"
+            delayMs={360}
+            durationMs={750}
+            style={[
+              styles.floatingCard,
+              styles.cardCategory,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
+          >
+            <View style={styles.cardContentRow}>
+              <View style={styles.categoryIconSquare}>
+                <Ionicons name="grid-outline" size={15} color="#8B5CF6" />
+              </View>
+              <View>
+                <Text style={[styles.cardValue, { color: colors.textPrimary }]}>25+</Text>
+                <Text style={[styles.cardLabel, { color: colors.textSecondary }]}>Service Category</Text>
               </View>
             </View>
+          </SlideUpTransition>
 
-            {/* Technician Hero Photo */}
-            <SlideUpTransition
-              preset="hero-reveal"
-              delayMs={160}
-              durationMs={850}
-              style={styles.technicianImageWrapper}
-            >
-              <Image
-                source={technicianImg}
-                style={styles.technicianImage}
-                resizeMode="contain"
-              />
-            </SlideUpTransition>
-
-            {/* Floating Metric Card 1: 25+ Service Category (Top Left) */}
-            <SlideUpTransition
-              preset="smooth-reveal"
-              delayMs={360}
-              durationMs={750}
-              style={[
-                styles.floatingCard,
-                styles.cardCategory,
-                { backgroundColor: colors.surface, borderColor: colors.border },
-              ]}
-            >
-              <View style={styles.cardContentRow}>
-                <View style={styles.categoryIconSquare}>
-                  <Ionicons name="grid-outline" size={15} color="#8B5CF6" />
-                </View>
-                <View>
-                  <Text style={[styles.cardValue, { color: colors.textPrimary }]}>25+</Text>
-                  <Text style={[styles.cardLabel, { color: colors.textSecondary }]}>Service Category</Text>
-                </View>
+          {/* Floating Metric Card 2: 3999+ User Review (Middle Right) */}
+          <SlideUpTransition
+            preset="smooth-reveal"
+            delayMs={480}
+            durationMs={750}
+            style={[
+              styles.floatingCard,
+              styles.cardReview,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
+          >
+            <View style={styles.cardContentRow}>
+              <View style={styles.starIconSquare}>
+                <Ionicons name="star" size={16} color="#F97316" />
               </View>
-            </SlideUpTransition>
-
-            {/* Floating Metric Card 2: 3999+ User Review (Middle Right) */}
-            <SlideUpTransition
-              preset="smooth-reveal"
-              delayMs={480}
-              durationMs={750}
-              style={[
-                styles.floatingCard,
-                styles.cardReview,
-                { backgroundColor: colors.surface, borderColor: colors.border },
-              ]}
-            >
-              <View style={styles.cardContentRow}>
-                <View style={styles.starIconSquare}>
-                  <Ionicons name="star" size={16} color="#F97316" />
-                </View>
-                <View>
-                  <Text style={[styles.cardValue, { color: colors.textPrimary }]}>3999+</Text>
-                  <Text style={[styles.cardLabel, { color: colors.textSecondary }]}>User Review</Text>
-                </View>
+              <View>
+                <Text style={[styles.cardValue, { color: colors.textPrimary }]}>3999+</Text>
+                <Text style={[styles.cardLabel, { color: colors.textSecondary }]}>User Review</Text>
               </View>
-            </SlideUpTransition>
+            </View>
+          </SlideUpTransition>
 
-            {/* Floating Metric Card 3: 2000+ Expert Worker (Bottom Left) */}
-            <SlideUpTransition
-              preset="smooth-reveal"
-              delayMs={600}
-              durationMs={750}
-              style={[
-                styles.floatingCard,
-                styles.cardWorker,
-                { backgroundColor: colors.surface, borderColor: colors.border },
-              ]}
-            >
-              <View style={styles.cardContentRow}>
-                <View style={styles.checkIconSquare}>
-                  <Ionicons name="checkmark-circle" size={17} color="#14B8A6" />
-                </View>
-                <View>
-                  <Text style={[styles.cardValue, { color: colors.textPrimary }]}>2000+</Text>
-                  <Text style={[styles.cardLabel, { color: colors.textSecondary }]}>Expert Worker</Text>
-                </View>
+          {/* Floating Metric Card 3: 2000+ Expert Worker (Bottom Left) */}
+          <SlideUpTransition
+            preset="smooth-reveal"
+            delayMs={600}
+            durationMs={750}
+            style={[
+              styles.floatingCard,
+              styles.cardWorker,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
+          >
+            <View style={styles.cardContentRow}>
+              <View style={styles.checkIconSquare}>
+                <Ionicons name="checkmark-circle" size={17} color="#14B8A6" />
               </View>
-            </SlideUpTransition>
-          </View>
-        </SafeAreaView>
+              <View>
+                <Text style={[styles.cardValue, { color: colors.textPrimary }]}>2000+</Text>
+                <Text style={[styles.cardLabel, { color: colors.textSecondary }]}>Expert Worker</Text>
+              </View>
+            </View>
+          </SlideUpTransition>
+        </View>
 
         {/* 4. Bottom Actions: User's Recent "Drag to Start" Button */}
         <SafeAreaView edges={['bottom']} style={styles.bottomBarContainer}>
@@ -300,6 +342,7 @@ export default function WelcomeScreen() {
             <DragToStartButton
               title="Get Started"
               onComplete={handleGetStarted}
+              dragProgressAnimated={dragProgress}
               trackColor={isDark ? colors.surface : '#FFFFFF'}
               thumbColor={isDark ? colors.primaryLight : '#0F172A'}
               textColor="#FFFFFF"
@@ -316,7 +359,7 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
-    backgroundColor: '#FDFBF9', // Soft cream/peach backdrop matching reference design
+    backgroundColor: '#FDFBF9',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -329,16 +372,15 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
   },
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: Platform.OS === 'ios' ? 8 : 16,
-    zIndex: 2,
+  topSafeArea: {
+    paddingHorizontal: 22,
+    paddingTop: Platform.OS === 'ios' ? 8 : 14,
+    zIndex: 10,
   },
 
   /* Header */
   headerRow: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   headerInnerRow: {
     flexDirection: 'row',
@@ -386,7 +428,7 @@ const styles = StyleSheet.create({
 
   /* Hero Typography */
   heroTextSection: {
-    marginBottom: 8,
+    marginBottom: 4,
     zIndex: 5,
   },
   eyebrowTag: {
@@ -405,7 +447,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#0F172A', // Deep navy
     letterSpacing: -0.5,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   subtitle: {
     ...Typography.body,
@@ -415,64 +457,64 @@ const styles = StyleSheet.create({
     maxWidth: '92%',
   },
 
-  /* Center Technician Section */
+  /* Center Technician Section - Full Screen Hero */
   technicianSection: {
     flex: 1,
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'flex-end',
     position: 'relative',
-    marginTop: 6,
-    marginBottom: 6,
+    overflow: 'visible',
+    marginTop: -4,
   },
   organicBlueWave: {
     position: 'absolute',
-    bottom: -10,
-    left: -20,
-    right: -20,
-    height: 120,
+    bottom: -15,
+    left: -24,
+    right: -24,
+    height: Math.min(height * 0.22, 170),
     backgroundColor: '#1E40AF', // Vivid royal blue organic base
-    borderTopLeftRadius: 180,
-    borderTopRightRadius: 120,
-    opacity: 0.95,
+    borderTopLeftRadius: 220,
+    borderTopRightRadius: 150,
+    opacity: 0.96,
     zIndex: 1,
   },
   dashedLoopWrap: {
     position: 'absolute',
-    top: 10,
-    left: 20,
-    right: 20,
-    bottom: 60,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 40,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 2,
   },
   dashedLoopCurve: {
-    width: width * 0.76,
-    height: height * 0.32,
+    width: Math.min(width * 0.82, 380),
+    height: Math.min(heroHeight * 0.62, 320),
     borderWidth: 2,
     borderStyle: 'dashed',
     borderColor: 'rgba(220, 117, 82, 0.45)', // Soft terracotta dashed line
-    borderRadius: 140,
+    borderRadius: 150,
     transform: [{ rotate: '-18deg' }, { scaleX: 1.15 }],
   },
   arrowPointer: {
     position: 'absolute',
-    top: '8%',
-    left: '18%',
+    top: '10%',
+    left: '16%',
     zIndex: 3,
   },
   technicianImageWrapper: {
-    width: '100%',
-    height: '100%',
-    maxHeight: Math.min(height * 0.52, 420),
+    width: heroWidth,
+    height: heroHeight,
     alignItems: 'center',
     justifyContent: 'flex-end',
     zIndex: 4,
   },
   technicianImage: {
-    width: '100%',
-    height: '100%',
-    marginBottom: -10,
+    width: heroWidth,
+    height: heroHeight,
+    marginBottom: Platform.OS === 'ios' ? -8 : -4,
   },
 
   /* Floating Metric Cards */
@@ -511,10 +553,10 @@ const styles = StyleSheet.create({
     lineHeight: 12,
   },
 
-  /* Specific Card Positions */
+  /* Specific Card Positions flanking the full-screen technician */
   cardCategory: {
-    top: '20%',
-    left: 4,
+    top: Math.round(heroHeight * 0.12),
+    left: 14,
   },
   categoryIconSquare: {
     width: 28,
@@ -526,8 +568,8 @@ const styles = StyleSheet.create({
   },
 
   cardReview: {
-    top: '44%',
-    right: 4,
+    top: Math.round(heroHeight * 0.38),
+    right: 14,
   },
   starIconSquare: {
     width: 28,
@@ -539,8 +581,8 @@ const styles = StyleSheet.create({
   },
 
   cardWorker: {
-    bottom: '22%',
-    left: 8,
+    bottom: Math.round(heroHeight * 0.20),
+    left: 14,
   },
   checkIconSquare: {
     width: 28,
@@ -558,6 +600,7 @@ const styles = StyleSheet.create({
     paddingBottom: Platform.OS === 'ios' ? 14 : 20,
     paddingTop: 4,
     zIndex: 20,
+    position: 'relative',
   },
   buttonWrapper: {
     width: '100%',

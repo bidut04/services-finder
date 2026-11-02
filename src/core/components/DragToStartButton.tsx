@@ -24,6 +24,8 @@ export interface DragToStartButtonProps {
   thumbColor?: string;
   textColor?: string;
   arrowColor?: string;
+  onDragProgress?: (progress: number) => void;
+  dragProgressAnimated?: Animated.Value;
 }
 
 const TRACK_H = 58;
@@ -40,6 +42,8 @@ export const DragToStartButton: React.FC<DragToStartButtonProps> = ({
   thumbColor = Colors.primary,
   textColor = '#FFFFFF',
   arrowColor = Colors.textSecondary,
+  onDragProgress,
+  dragProgressAnimated,
 }) => {
   const [trackWidth, setTrackWidth] = useState(320);
   const [isDragging, setIsDragging] = useState(false);
@@ -61,6 +65,14 @@ export const DragToStartButton: React.FC<DragToStartButtonProps> = ({
   maxDragRef.current = maxDrag;
   disabledRef.current = disabled;
   onCompleteRef.current = onComplete;
+
+  const updateProgress = (val: number) => {
+    const progress = maxDragRef.current > 0 ? Math.max(0, Math.min(1, val / maxDragRef.current)) : 0;
+    if (dragProgressAnimated) {
+      dragProgressAnimated.setValue(progress);
+    }
+    onDragProgress?.(progress);
+  };
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
@@ -89,12 +101,26 @@ export const DragToStartButton: React.FC<DragToStartButtonProps> = ({
   const resetThumb = () => {
     isDraggingRef.current = false;
     setIsDragging(false);
-    Animated.spring(dragX, {
-      toValue: 0,
-      tension: 90,
-      friction: 9,
-      useNativeDriver: false,
-    }).start();
+    Animated.parallel([
+      Animated.spring(dragX, {
+        toValue: 0,
+        tension: 90,
+        friction: 9,
+        useNativeDriver: false,
+      }),
+      ...(dragProgressAnimated
+        ? [
+            Animated.spring(dragProgressAnimated, {
+              toValue: 0,
+              tension: 90,
+              friction: 9,
+              useNativeDriver: false,
+            }),
+          ]
+        : []),
+    ]).start(() => {
+      updateProgress(0);
+    });
   };
 
   const triggerComplete = () => {
@@ -103,12 +129,25 @@ export const DragToStartButton: React.FC<DragToStartButtonProps> = ({
     isDraggingRef.current = false;
     setIsDragging(false);
 
-    Animated.spring(dragX, {
-      toValue: maxDragRef.current,
-      bounciness: 3,
-      speed: 15,
-      useNativeDriver: false,
-    }).start(() => {
+    Animated.parallel([
+      Animated.spring(dragX, {
+        toValue: maxDragRef.current,
+        bounciness: 3,
+        speed: 15,
+        useNativeDriver: false,
+      }),
+      ...(dragProgressAnimated
+        ? [
+            Animated.spring(dragProgressAnimated, {
+              toValue: 1,
+              bounciness: 3,
+              speed: 15,
+              useNativeDriver: false,
+            }),
+          ]
+        : []),
+    ]).start(() => {
+      updateProgress(maxDragRef.current);
       timers.current.push(
         setTimeout(() => {
           onCompleteRef.current();
@@ -116,6 +155,8 @@ export const DragToStartButton: React.FC<DragToStartButtonProps> = ({
           timers.current.push(
             setTimeout(() => {
               dragX.setValue(0);
+              dragProgressAnimated?.setValue(0);
+              onDragProgress?.(0);
               completedRef.current = false;
             }, 800)
           );
@@ -144,6 +185,7 @@ export const DragToStartButton: React.FC<DragToStartButtonProps> = ({
         if (completedRef.current || maxDragRef.current <= 0) return;
         const clampedX = Math.max(0, Math.min(g.dx, maxDragRef.current));
         dragX.setValue(clampedX);
+        updateProgress(clampedX);
       },
       onPanResponderRelease: (_, g) => {
         if (completedRef.current || maxDragRef.current <= 0) return;
@@ -184,6 +226,7 @@ export const DragToStartButton: React.FC<DragToStartButtonProps> = ({
       const delta = moveEvt.clientX - startClientX;
       const nextX = Math.max(0, Math.min(initialDragX + delta, maxDragRef.current));
       dragX.setValue(nextX);
+      updateProgress(nextX);
     };
 
     const onMouseUp = (upEvt: MouseEvent) => {
