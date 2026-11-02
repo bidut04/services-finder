@@ -475,6 +475,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'visible',
     marginTop: -4,
+    zIndex: 5,
   },
   organicBlueWave: {
     position: 'absolute',
@@ -486,7 +487,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 240,
     borderTopRightRadius: 160,
     opacity: 0.98,
-    zIndex: 1,
+    zIndex: 0,
   },
   dashedLoopWrap: {
     position: 'absolute',
