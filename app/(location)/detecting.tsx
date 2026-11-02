@@ -73,7 +73,7 @@ export default function DetectingLocationScreen() {
       <View style={styles.content}>
         {/* Radar Animation Area */}
         <View style={styles.radarContainer}>
-          <RadarPulse size={width * 0.45} color={Colors.primary} />
+          <RadarPulse size={width * 0.45} color="#14B8A6" />
         </View>
 
         {/* Dynamic Status Messaging */}

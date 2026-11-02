@@ -253,9 +253,9 @@ export default function LocationPermissionScreen() {
             <View style={styles.centerPinWrapper}>
               <View style={styles.centerPinCard}>
                 <View style={styles.avatarCircle}>
-                  <Ionicons name="person" size={26} color={Colors.primary} />
+                  <Ionicons name="person" size={26} color="#14B8A6" />
                 </View>
-                {/* Green Location Badge Pointer */}
+                {/* Teal Green Location Badge Pointer */}
                 <View style={styles.pointerBadge}>
                   <Ionicons name="location" size={13} color="#FFFFFF" />
                 </View>
@@ -289,8 +289,8 @@ export default function LocationPermissionScreen() {
         {/* Feature Highlights Card */}
         <SlideUpTransition preset="card-slide" delayMs={140} durationMs={600} style={styles.featuresCard}>
           <View style={styles.featureItem}>
-            <View style={[styles.featureIcon, { backgroundColor: Colors.primaryBackground }]}>
-              <Ionicons name="flash-outline" size={19} color={Colors.primary} />
+            <View style={[styles.featureIcon, { backgroundColor: '#CCFBF1' }]}>
+              <Ionicons name="flash-outline" size={19} color="#14B8A6" />
             </View>
             <View style={styles.featureTextCol}>
               <Text style={styles.featureTitle}>Instant Pro Matching</Text>
@@ -477,23 +477,23 @@ const styles = StyleSheet.create({
     width: 210,
     height: 210,
     borderRadius: 105,
-    backgroundColor: 'rgba(30, 64, 175, 0.18)',
+    backgroundColor: 'rgba(20, 184, 166, 0.18)', // Teal Green #14B8A6 radar wave
   },
   outerRadarRing: {
     position: 'absolute',
     width: 170,
     height: 170,
     borderRadius: 85,
-    backgroundColor: 'rgba(30, 64, 175, 0.10)',
+    backgroundColor: 'rgba(20, 184, 166, 0.10)',
     borderWidth: 1,
-    borderColor: 'rgba(30, 64, 175, 0.16)',
+    borderColor: 'rgba(20, 184, 166, 0.20)',
   },
   innerRadarRing: {
     position: 'absolute',
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: 'rgba(30, 64, 175, 0.16)',
+    backgroundColor: 'rgba(20, 184, 166, 0.16)',
   },
   centerPinWrapper: {
     alignItems: 'center',
@@ -507,9 +507,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: Colors.primary,
+    shadowColor: '#14B8A6',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.22,
+    shadowOpacity: 0.24,
     shadowRadius: 12,
     elevation: 6,
     borderWidth: 3,
@@ -528,7 +528,7 @@ const styles = StyleSheet.create({
     borderRightColor: 'transparent',
     borderTopColor: '#FFFFFF',
     marginTop: -3,
-    shadowColor: Colors.primary,
+    shadowColor: '#14B8A6',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.18,
     shadowRadius: 4,
@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
     width: 62,
     height: 62,
     borderRadius: 31,
-    backgroundColor: Colors.primaryBackground,
+    backgroundColor: '#CCFBF1', // Soft Teal light wash
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -4,
     right: -2,
-    backgroundColor: Colors.primary,
+    backgroundColor: '#14B8A6', // Teal Green #14B8A6 pointer badge
     width: 24,
     height: 24,
     borderRadius: 12,
@@ -568,7 +568,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   titleHighlight: {
-    color: Colors.primary,
+    color: '#14B8A6', // Teal Green #14B8A6 highlight
   },
   subtitle: {
     ...Typography.body,
@@ -599,7 +599,7 @@ const styles = StyleSheet.create({
     width: 18,
     height: 6,
     borderRadius: 3,
-    backgroundColor: Colors.primary,
+    backgroundColor: '#14B8A6',
   },
   featuresCard: {
     backgroundColor: '#FFFFFF',
