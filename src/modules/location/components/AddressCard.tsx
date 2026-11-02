@@ -49,7 +49,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
       </View>
 
       {isSelected && (
-        <Ionicons name="checkmark-circle" size={24} color={Colors.primary} />
+        <Ionicons name="checkmark-circle" size={24} color={Colors.success} />
       )}
     </TouchableOpacity>
   );

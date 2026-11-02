@@ -25,6 +25,8 @@ export interface ColorPalette {
   emergencyLight: string;
   warning: string;
   success: string;
+  successLight: string;
+  teal: string;
   star: string;
 }
 
@@ -61,7 +63,9 @@ export const LightTheme: ColorPalette = {
   emergency: '#EF4444',
   emergencyLight: '#FEE2E2',
   warning: '#F59E0B',
-  success: '#10B981',
+  success: '#14B8A6',           // Teal Green (#14B8A6) · GPS detected and success indicator
+  successLight: '#CCFBF1',      // Soft Teal wash
+  teal: '#14B8A6',              // Teal Green accent
   star: '#F97316',
 };
 
@@ -98,7 +102,9 @@ export const DarkTheme: ColorPalette = {
   emergency: '#EF4444',
   emergencyLight: '#451A1A',
   warning: '#F59E0B',
-  success: '#10B981',
+  success: '#14B8A6',           // Teal Green (#14B8A6) · GPS detected and success indicator
+  successLight: 'rgba(20, 184, 166, 0.18)',
+  teal: '#14B8A6',              // Teal Green accent
   star: '#F97316',
 };
 

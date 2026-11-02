@@ -109,8 +109,8 @@ export default function DetectingLocationScreen() {
             </View>
 
             <View style={styles.addressRow}>
-              <View style={styles.pinIconBox}>
-                <Ionicons name="location" size={24} color={Colors.primary} />
+              <View style={[styles.pinIconBox, { backgroundColor: Colors.successLight }]}>
+                <Ionicons name="checkmark-circle" size={24} color={Colors.success} />
               </View>
               <View style={styles.addressTextCol}>
                 <Text style={styles.cityName}>
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   gpsLivePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.primaryBackground,
+    backgroundColor: Colors.successLight,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -216,12 +216,12 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: Colors.success,
+    backgroundColor: Colors.success, // Teal Green #14B8A6
     marginRight: 6,
   },
   liveGpsText: {
     ...Typography.caption,
-    color: Colors.primary,
+    color: Colors.success, // Teal Green #14B8A6 GPS locked
     fontWeight: '700',
   },
   coordsText: {

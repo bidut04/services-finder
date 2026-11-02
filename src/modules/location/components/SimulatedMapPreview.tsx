@@ -26,7 +26,7 @@ export const SimulatedMapPreview: React.FC<SimulatedMapPreviewProps> = ({
           <Ionicons name="location" size={36} color={Colors.primary} />
         </View>
         <View style={styles.pinCallout}>
-          <Text style={styles.pinCalloutText}>Confirmed Location</Text>
+          <Text style={styles.pinCalloutText}>GPS Detected</Text>
         </View>
       </View>
 
@@ -35,7 +35,7 @@ export const SimulatedMapPreview: React.FC<SimulatedMapPreviewProps> = ({
         style={styles.recenterButton}
         onPress={onRecenterPress}
       >
-        <Ionicons name="locate" size={22} color={Colors.primary} />
+        <Ionicons name="locate" size={22} color={Colors.success} />
       </TouchableOpacity>
     </View>
   );
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: 'rgba(30, 64, 175, 0.2)',
+    backgroundColor: 'rgba(20, 184, 166, 0.22)', // Teal Green #14B8A6 GPS radar ring
   },
   pinShadow: {
     position: 'absolute',
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   pinCallout: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.success, // Teal Green #14B8A6 GPS detected callout
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,

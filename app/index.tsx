@@ -283,7 +283,7 @@ export default function WelcomeScreen() {
             >
               <View style={styles.cardContentRow}>
                 <View style={styles.checkIconSquare}>
-                  <Ionicons name="checkmark-circle" size={17} color="#10B981" />
+                  <Ionicons name="checkmark-circle" size={17} color="#14B8A6" />
                 </View>
                 <View>
                   <Text style={[styles.cardValue, { color: colors.textPrimary }]}>2000+</Text>
@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 8,
-    backgroundColor: '#D1FAE5',
+    backgroundColor: '#CCFBF1', // Teal wash matching #14B8A6
     alignItems: 'center',
     justifyContent: 'center',
   },
