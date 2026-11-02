@@ -58,11 +58,12 @@ export const ServiceProviderDetail: React.FC<ServiceProviderDetailProps> = ({
     }
   };
 
-  const imageSource = imageUrl
-    ? typeof imageUrl === 'string'
+  const imageSource =
+    imageUrl && typeof imageUrl === 'string' && imageUrl.trim().length > 0
       ? { uri: imageUrl }
-      : imageUrl
-    : cleanerHeroImg;
+      : imageUrl && typeof imageUrl === 'object'
+      ? imageUrl
+      : cleanerHeroImg;
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? colors.background : '#FFFFFF' }]}>
@@ -124,7 +125,12 @@ export const ServiceProviderDetail: React.FC<ServiceProviderDetailProps> = ({
 
             {/* Right Column: Female Cleaner with mop and bucket */}
             <View style={styles.heroRightCol}>
-              <SlideUpTransition preset="hero-reveal" delayMs={100} durationMs={700}>
+              <SlideUpTransition
+                preset="hero-reveal"
+                delayMs={100}
+                durationMs={700}
+                style={styles.heroImageWrapper}
+              >
                 <Image
                   source={imageSource}
                   style={styles.cleanerPhoto}
@@ -334,6 +340,12 @@ const styles = StyleSheet.create({
   heroRightCol: {
     width: 175,
     height: 235,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  heroImageWrapper: {
+    width: '100%',
+    height: '100%',
     justifyContent: 'flex-end',
     alignItems: 'center',
   },
