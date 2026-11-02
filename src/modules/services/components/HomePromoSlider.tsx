@@ -124,15 +124,30 @@ export const HomePromoSlider: React.FC<HomePromoSliderProps> = ({
         style={{ width: sliderWidth }}
         contentContainerStyle={{ width: sliderWidth * 2 }}
       >
-        {/* SLIDE 1: Smart Home Service (Emerald Green Theme) */}
+        {/* SLIDE 1: Smart Home Service (Royal Blue Theme) */}
         <View style={[styles.slideCard, styles.smartHomeBg, { width: sliderWidth }]}>
+          {/* Ambient decorative glow */}
+          <View style={styles.ambientGlowBlue} pointerEvents="none" />
+
           {/* Left Text & CTA */}
           <View style={styles.promoTextCol}>
-            <View style={styles.promoBadge}>
-              <Text style={styles.promoBadgeText}>Limited offer</Text>
+            <View style={styles.promoBadgeRow}>
+              <View style={styles.promoBadge}>
+                <View style={styles.amberSpark} />
+                <Text style={styles.promoBadgeText}>Limited offer</Text>
+              </View>
+              <View style={styles.ratingBadge}>
+                <Ionicons name="star" size={10} color="#FBBF24" />
+                <Text style={styles.ratingBadgeText}>4.9</Text>
+              </View>
             </View>
 
-            <Text style={styles.promoTitle}>Smart Home{'\n'}Service</Text>
+            <View>
+              <Text style={styles.promoTitle}>Smart Home{'\n'}Service</Text>
+              <Text style={styles.promoSubtitle} numberOfLines={1}>
+                Cleaning & Automation
+              </Text>
+            </View>
 
             <TouchableOpacity
               style={styles.bookNowPill}
@@ -141,6 +156,7 @@ export const HomePromoSlider: React.FC<HomePromoSliderProps> = ({
             >
               <Ionicons name="calendar-outline" size={13} color="#FFFFFF" />
               <Text style={styles.bookNowText}>Book Now</Text>
+              <Ionicons name="arrow-forward" size={11} color="#94A3B8" />
             </TouchableOpacity>
           </View>
 
@@ -255,6 +271,15 @@ const styles = StyleSheet.create({
   smartHomeBg: {
     backgroundColor: '#1E3A8A', // Deep Royal Navy Blue matching Clean_space theme
   },
+  ambientGlowBlue: {
+    position: 'absolute',
+    left: -20,
+    top: -20,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+  },
   breakdownBg: {
     backgroundColor: '#1E293B', // Deep navy slate
   },
@@ -266,25 +291,61 @@ const styles = StyleSheet.create({
     height: '100%',
     zIndex: 2,
   },
+  promoBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   promoBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.22)',
-    paddingHorizontal: 9,
+    paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 12,
     alignSelf: 'flex-start',
   },
+  amberSpark: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#F59E0B',
+    marginRight: 4,
+  },
+  ratingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(0, 0, 0, 0.28)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  ratingBadgeText: {
+    ...Typography.caption,
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
   promoBadgeText: {
     ...Typography.caption,
-    fontSize: 11,
+    fontSize: 10.5,
     color: '#FFFFFF',
     fontWeight: '700',
   },
   promoTitle: {
     ...Typography.h2,
-    fontSize: 19,
+    fontSize: 18,
     fontWeight: '800',
     color: '#FFFFFF',
-    lineHeight: 23,
+    lineHeight: 22,
+  },
+  promoSubtitle: {
+    ...Typography.caption,
+    fontSize: 10,
+    color: 'rgba(255, 255, 255, 0.75)',
+    fontWeight: '600',
+    marginTop: 2,
   },
   bookNowPill: {
     flexDirection: 'row',
