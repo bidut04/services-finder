@@ -7,9 +7,11 @@ import {
   useScreenTransition,
 } from '../src/core/animations/SmoothScreenWrapper';
 import { useLocationStore } from '../src/modules/location/store/locationStore';
+import { useTheme } from '../src/core/theme/themeStore';
 
 export default function ProviderDetailScreen() {
   const router = useRouter();
+  const { isDark, colors } = useTheme();
   const params = useLocalSearchParams<{
     id?: string;
     title?: string;
@@ -26,17 +28,17 @@ export default function ProviderDetailScreen() {
     params.location ||
     (selectedAddress?.city
       ? `${selectedAddress.city}, ${selectedAddress.district || 'West Bengal'}`
-      : 'New York');
+      : '47 Dubai circuit, UAE');
 
   const handleBack = () => {
     navigateWithExit(() => router.back());
   };
 
   const handleBookNow = (selectedServices: string[]) => {
-    const serviceName = params.title || 'Home Cleaning';
+    const serviceName = params.title || 'Plumbing Service';
     const message = `Booking initiated for ${serviceName} (${selectedServices.join(
       ', '
-    )}) at ${params.price || '$65/Hr'}.`;
+    )}) at ${params.price || '$32.00/hr'}.`;
 
     if (Platform.OS === 'web') {
       window.alert(message);
@@ -52,18 +54,18 @@ export default function ProviderDetailScreen() {
   };
 
   return (
-    <SmoothScreenWrapper backgroundColor="#0F1014">
+    <SmoothScreenWrapper backgroundColor={isDark ? colors.background : '#FFFFFF'}>
       <ServiceProviderDetail
-        title={params.title || 'Home Cleaning'}
+        title={params.title || 'Plumbing Service'}
         location={currentCity}
-        rating={params.rating ? parseFloat(params.rating) : 4.9}
-        hourlyRate={params.price || '$65/Hr'}
+        rating={params.rating || '6.8'}
+        weeklyRate="$367.00"
+        hourlyRate={params.price || '$32.00'}
         imageUrl={params.imageUrl}
         onBack={handleBack}
         onBookNow={handleBookNow}
-        accentColor="#7C3AED" // Matches the purple pill CTA in screenshot
+        accentColor="#0F172A"
       />
     </SmoothScreenWrapper>
   );
 }
-
