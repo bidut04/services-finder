@@ -206,6 +206,15 @@ export default function WelcomeScreen() {
           },
         ]}
       >
+        {/* Background Organic Blue Curved Shape: fills the entire bottom behind drag button */}
+        <View
+          style={[
+            styles.organicBlueWave,
+            { backgroundColor: isDark ? '#1E3A8A' : '#1E40AF' },
+          ]}
+          pointerEvents="none"
+        />
+
         <SafeAreaView edges={['top']} style={styles.topSafeArea}>
           {/* 1. Header Bar: CS Logo + Brand Name + Theme Switcher */}
           <SlideUpTransition preset="fade-slide" delayMs={60} durationMs={500} style={styles.headerRow}>
@@ -244,9 +253,6 @@ export default function WelcomeScreen() {
 
         {/* 3. Center Section: Technician Image + Curved Trail + Floating Metric Cards */}
         <View style={styles.technicianSection}>
-          {/* Background Organic Blue Curved Shape */}
-          <View style={styles.organicBlueWave} pointerEvents="none" />
-
           {/* Dashed Loop Trajectory Pathway with Arrow */}
           <View style={styles.dashedLoopWrap} pointerEvents="none">
             <View style={styles.dashedLoopCurve} />
@@ -347,7 +353,10 @@ export default function WelcomeScreen() {
               thumbColor={isDark ? colors.primaryLight : '#0F172A'}
               textColor="#FFFFFF"
               arrowColor={isDark ? '#CBD5E1' : '#94A3B8'}
-              style={[styles.dragButton, { borderColor: colors.border }]}
+              style={[
+                styles.dragButton,
+                { borderColor: isDark ? colors.border : 'rgba(255, 255, 255, 0.4)' },
+              ]}
             />
           </SlideUpTransition>
         </SafeAreaView>
@@ -469,14 +478,14 @@ const styles = StyleSheet.create({
   },
   organicBlueWave: {
     position: 'absolute',
-    bottom: -15,
-    left: -24,
-    right: -24,
-    height: Math.min(height * 0.22, 170),
+    bottom: 0,
+    left: -30,
+    right: -30,
+    height: Math.min(height * 0.32, 270),
     backgroundColor: '#1E40AF', // Vivid royal blue organic base
-    borderTopLeftRadius: 220,
-    borderTopRightRadius: 150,
-    opacity: 0.96,
+    borderTopLeftRadius: 240,
+    borderTopRightRadius: 160,
+    opacity: 0.98,
     zIndex: 1,
   },
   dashedLoopWrap: {
@@ -598,20 +607,21 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 22,
     paddingBottom: Platform.OS === 'ios' ? 14 : 20,
-    paddingTop: 4,
+    paddingTop: 6,
     zIndex: 20,
     position: 'relative',
+    backgroundColor: 'transparent',
   },
   buttonWrapper: {
     width: '100%',
   },
   dragButton: {
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: 'rgba(255, 255, 255, 0.4)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.16,
+    shadowRadius: 12,
+    elevation: 6,
   },
 });
