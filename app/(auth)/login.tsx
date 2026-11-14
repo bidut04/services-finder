@@ -9,6 +9,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Animated,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -74,10 +75,14 @@ export default function LoginScreen() {
               <View style={styles.content}>
                 <ScrubberItem index={1} slideDistance={18}>
                   <View style={styles.iconCircle}>
-                    <Ionicons name="shield-checkmark" size={32} color={Colors.navy} />
+                    <Image
+                      source={require('../../assets/app-logo-mark.png')}
+                      style={{ width: 34, height: 34, tintColor: Colors.navy }}
+                      resizeMode="contain"
+                    />
                   </View>
 
-                  <Text style={styles.title}>Welcome to HelpNear</Text>
+                  <Text style={styles.title}>Welcome to Home Service</Text>
                   <Text style={styles.subtitle}>
                     Enter your mobile number to get access to nearby verified home services
                     and rapid roadside assistance.

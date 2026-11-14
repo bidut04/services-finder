@@ -9,6 +9,7 @@ import {
   PanResponder,
   Platform,
   LayoutChangeEvent,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -207,9 +208,13 @@ export default function LocationPermissionScreen() {
           <View style={styles.topBar}>
             <View style={styles.brandPill}>
               <View style={styles.brandLogoCircle}>
-                <Ionicons name="sparkles" size={13} color="#FFFFFF" />
+                <Image
+                  source={require('../../assets/app-logo-mark.png')}
+                  style={{ width: 15, height: 15, tintColor: '#FFFFFF' }}
+                  resizeMode="contain"
+                />
               </View>
-              <Text style={styles.brandTitle}>HelpNear</Text>
+              <Text style={styles.brandTitle}>Home Service</Text>
             </View>
 
             <Pressable

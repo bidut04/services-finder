@@ -35,6 +35,7 @@ const HERO_ASPECT_RATIO = 896 / 1200;
 const heroHeight = Math.min(heroWidth / HERO_ASPECT_RATIO, height * 0.64);
 
 const technicianImg = require('../assets/technician-hero.png');
+const appLogoMark = require('../assets/app-logo-mark.png');
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -221,10 +222,16 @@ export default function WelcomeScreen() {
             <View style={styles.headerInnerRow}>
               <View style={styles.brandRow}>
                 <View style={[styles.logoBadge, { backgroundColor: colors.surface, borderColor: colors.borderLight }]}>
-                  <Text style={[styles.logoTextC, { color: colors.textPrimary }]}>C</Text>
-                  <Text style={styles.logoTextS}>S</Text>
+                  <Image
+                    source={appLogoMark}
+                    style={[
+                      styles.logoIconImage,
+                      { tintColor: isDark ? '#F8FAFC' : '#0F172A' },
+                    ]}
+                    resizeMode="contain"
+                  />
                 </View>
-                <Text style={[styles.brandName, { color: colors.textPrimary }]}>Clean_space</Text>
+                <Text style={[styles.brandName, { color: colors.textPrimary }]}>Home Service</Text>
               </View>
 
               <ThemeSwitcher variant="pill" />
@@ -402,11 +409,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   logoBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: '#FFFFFF',
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -417,15 +423,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#F1F5F9',
   },
-  logoTextC: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#0F172A',
-  },
-  logoTextS: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#F97316',
+  logoIconImage: {
+    width: 22,
+    height: 22,
   },
   brandName: {
     ...Typography.h3,
