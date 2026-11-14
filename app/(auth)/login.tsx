@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
@@ -55,13 +55,16 @@ export default function LoginScreen() {
               {/* Header Bar */}
               <ScrubberItem index={0} slideDistance={12}>
                 <View style={styles.header}>
-                  <TouchableOpacity
+                  <Pressable
                     onPress={handleBack}
-                    style={styles.backButton}
-                    activeOpacity={0.7}
+                    style={({ pressed }) => [
+                      styles.backButton,
+                      { opacity: pressed ? 0.7 : 1, transform: [{ scale: pressed ? 0.94 : 1 }] },
+                    ]}
+                    hitSlop={8}
                   >
                     <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
-                  </TouchableOpacity>
+                  </Pressable>
                   <Text style={styles.headerTitle}>Sign In</Text>
                   <View style={styles.placeholder} />
                 </View>

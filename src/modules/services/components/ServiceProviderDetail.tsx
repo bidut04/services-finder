@@ -4,7 +4,7 @@ import {
   Text,
   StyleSheet,
   Image,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
   Platform,
   Alert,
@@ -82,14 +82,17 @@ export const ServiceProviderDetail: React.FC<ServiceProviderDetailProps> = ({
         <View style={[styles.topHeroSection, { backgroundColor: isDark ? '#1E293B' : '#EDF5FF' }]}>
           {/* Header Bar: < Back */}
           <SafeAreaView edges={['top']} style={styles.topHeaderBar}>
-            <TouchableOpacity
+            <Pressable
               onPress={onBack}
-              style={styles.backButton}
-              activeOpacity={0.7}
+              style={({ pressed }) => [
+                styles.backButton,
+                { opacity: pressed ? 0.7 : 1, transform: [{ scale: pressed ? 0.96 : 1 }] },
+              ]}
+              hitSlop={8}
             >
               <Ionicons name="chevron-back" size={20} color="#0284C7" />
               <Text style={styles.backText}>Back</Text>
-            </TouchableOpacity>
+            </Pressable>
           </SafeAreaView>
 
           {/* Hero Row: Left Meta + Right Cleaner Image */}
@@ -174,9 +177,12 @@ export const ServiceProviderDetail: React.FC<ServiceProviderDetailProps> = ({
               <Text style={[styles.sectionHeading, { color: isDark ? colors.textPrimary : '#0F172A' }]}>
                 Review From Client
               </Text>
-              <TouchableOpacity activeOpacity={0.7}>
+              <Pressable
+                style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+                hitSlop={8}
+              >
                 <Text style={styles.viewAllLink}>View all</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
 
             {/* Review Card */}
@@ -222,13 +228,19 @@ export const ServiceProviderDetail: React.FC<ServiceProviderDetailProps> = ({
           </View>
 
           {/* Book Now Button: Deep Navy #0F172A */}
-          <TouchableOpacity
-            style={styles.bookNowBtn}
-            activeOpacity={0.85}
+          <Pressable
+            style={({ pressed }) => [
+              styles.bookNowBtn,
+              {
+                opacity: pressed ? 0.88 : 1,
+                transform: [{ scale: pressed ? 0.98 : 1 }],
+              },
+            ]}
+            android_ripple={{ color: 'rgba(255, 255, 255, 0.15)' }}
             onPress={handleBooking}
           >
             <Text style={styles.bookNowBtnText}>Book Now</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </SafeAreaView>
     </View>

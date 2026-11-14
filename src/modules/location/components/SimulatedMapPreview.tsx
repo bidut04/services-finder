@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../core/theme/colors';
 import { Typography } from '../../../core/theme/typography';
@@ -30,13 +30,18 @@ export const SimulatedMapPreview: React.FC<SimulatedMapPreviewProps> = ({
         </View>
       </View>
 
-      <TouchableOpacity
-        activeOpacity={0.8}
-        style={styles.recenterButton}
+      <Pressable
+        style={({ pressed }) => [
+          styles.recenterButton,
+          {
+            opacity: pressed ? 0.8 : 1,
+            transform: [{ scale: pressed ? 0.93 : 1 }],
+          },
+        ]}
         onPress={onRecenterPress}
       >
         <Ionicons name="locate" size={22} color={Colors.success} />
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 };

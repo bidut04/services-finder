@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   View,
   Text,
   Image,
@@ -39,16 +39,20 @@ export const CategoryList: React.FC<CategoryListProps> = ({
           typeof cat.image === 'string' ? { uri: cat.image } : cat.image;
 
         return (
-          <TouchableOpacity
+          <Pressable
             key={cat.id}
             onPress={() => onSelectCategory?.(cat)}
-            style={[
+            android_ripple={{ color: 'rgba(0, 0, 0, 0.06)', borderless: false }}
+            style={({ pressed }) => [
               styles.card,
               isSelected
                 ? [styles.activeCard, { backgroundColor: accentColor }]
                 : [styles.inactiveCard, { backgroundColor: bgColor }],
+              {
+                opacity: pressed ? 0.85 : 1,
+                transform: [{ scale: pressed ? 0.95 : 1 }],
+              },
             ]}
-            activeOpacity={0.8}
           >
             {/* Circular Thumbnail Photo Wrapper */}
             <View
@@ -82,7 +86,7 @@ export const CategoryList: React.FC<CategoryListProps> = ({
             >
               {cat.name}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         );
       })}
     </ScrollView>

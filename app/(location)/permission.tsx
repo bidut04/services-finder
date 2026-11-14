@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
   Animated,
   PanResponder,
@@ -212,13 +212,13 @@ export default function LocationPermissionScreen() {
               <Text style={styles.brandTitle}>HelpNear</Text>
             </View>
 
-            <TouchableOpacity
+            <Pressable
               onPress={handleManualLocation}
-              activeOpacity={0.7}
-              style={styles.skipButton}
+              style={({ pressed }) => [styles.skipButton, { opacity: pressed ? 0.7 : 1 }]}
+              hitSlop={8}
             >
               <Text style={styles.skipText}>Skip</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </ScrubberItem>
 
@@ -364,15 +364,15 @@ export default function LocationPermissionScreen() {
           </View>
 
           {/* Fallback Text Link */}
-          <TouchableOpacity
-            activeOpacity={0.75}
+          <Pressable
             onPress={handleManualLocation}
-            style={styles.manualButton}
+            style={({ pressed }) => [styles.manualButton, { opacity: pressed ? 0.75 : 1 }]}
+            hitSlop={8}
           >
             <Text style={styles.manualButtonText}>
               Set Location Manually Instead
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </SlideUpTransition>
       </ScrollView>
     </SafeAreaView>

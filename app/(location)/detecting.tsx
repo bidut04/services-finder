@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   Dimensions,
   Animated,
 } from 'react-native';
@@ -134,12 +134,13 @@ export default function DetectingLocationScreen() {
             <Text style={styles.detectingHint}>
               Please hold on while we triangulate your location...
             </Text>
-            <TouchableOpacity
+            <Pressable
               onPress={handleProceedToConfirm}
-              style={styles.manualFallbackBtn}
+              style={({ pressed }) => [styles.manualFallbackBtn, { opacity: pressed ? 0.75 : 1 }]}
+              hitSlop={8}
             >
               <Text style={styles.manualFallbackText}>Skip and select manually</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         )}
       </View>

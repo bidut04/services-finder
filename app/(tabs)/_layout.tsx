@@ -1,136 +1,235 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../src/core/theme/colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/core/theme/themeStore';
 
-export default function TabLayout() {
-  const { isDark, colors } = useTheme();
+interface TabMeta {
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  activeIcon: keyof typeof Ionicons.glyphMap;
+  badge?: number;
+}
+
+const TABS_META: Record<string, TabMeta> = {
+  index: {
+    label: 'Home',
+    icon: 'home-outline',
+    activeIcon: 'home',
+  },
+  bookings: {
+    label: 'Bookings',
+    icon: 'calendar-outline',
+    activeIcon: 'calendar',
+  },
+  messages: {
+    label: 'Messages',
+    icon: 'chatbubble-ellipses-outline',
+    activeIcon: 'chatbubble-ellipses',
+    badge: 2,
+  },
+  profile: {
+    label: 'Profile',
+    icon: 'person-outline',
+    activeIcon: 'person',
+  },
+};
+
+function WhatsAppBottomTabBar({ state, descriptors, navigation }: any) {
+  const { isDark } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
+    <View
+      style={[
+        styles.navContainer,
+        {
+          backgroundColor: isDark ? '#0F172A' : '#FFFFFF',
+          borderTopColor: isDark ? '#1E293B' : '#E2E8F0',
+          paddingBottom: Math.max(insets.bottom, 8),
+        },
+      ]}
+    >
+      {state.routes.map((route: any, index: number) => {
+        const { options } = descriptors[route.key];
+        const isFocused = state.index === index;
+        const meta = TABS_META[route.name] || {
+          label: route.name,
+          icon: 'apps-outline',
+          activeIcon: 'apps',
+        };
+
+        const onPress = () => {
+          const event = navigation.emit({
+            type: 'tabPress',
+            target: route.key,
+            canPreventDefault: true,
+          });
+
+          if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(route.name, route.params);
+          }
+        };
+
+        const onLongPress = () => {
+          navigation.emit({
+            type: 'tabLongPress',
+            target: route.key,
+          });
+        };
+
+        return (
+          <Pressable
+            key={route.name}
+            accessibilityRole="button"
+            accessibilityState={isFocused ? { selected: true } : {}}
+            accessibilityLabel={options.tabBarAccessibilityLabel || meta.label}
+            onPress={onPress}
+            onLongPress={onLongPress}
+            android_ripple={{
+              borderless: true,
+              color: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
+              radius: 36,
+            }}
+            style={({ pressed }) => [
+              styles.tabItem,
+              {
+                opacity: pressed ? 0.75 : 1,
+                transform: [{ scale: pressed ? 0.92 : 1 }],
+              },
+            ]}
+          >
+            {/* WhatsApp Active Pill Indicator behind Icon */}
+            <View
+              style={[
+                styles.iconPill,
+                isFocused && [
+                  styles.iconPillActive,
+                  {
+                    backgroundColor: isDark
+                      ? 'rgba(20, 184, 166, 0.22)'
+                      : '#DCFCE7', // WhatsApp's iconic soft mint green pill
+                  },
+                ],
+              ]}
+            >
+              <Ionicons
+                name={isFocused ? meta.activeIcon : meta.icon}
+                size={22}
+                color={
+                  isFocused
+                    ? isDark
+                      ? '#2DD4BF'
+                      : '#0F5132' // WhatsApp deep green
+                    : isDark
+                    ? '#94A3B8'
+                    : '#64748B'
+                }
+              />
+
+              {/* Notification Badge if present (like WhatsApp unread counter) */}
+              {meta.badge && !isFocused && (
+                <View style={styles.unreadBadge}>
+                  <Text style={styles.unreadBadgeText}>{meta.badge}</Text>
+                </View>
+              )}
+            </View>
+
+            {/* Tab Label Text underneath icon */}
+            <Text
+              style={[
+                styles.tabLabel,
+                {
+                  color: isFocused
+                    ? isDark
+                      ? '#F8FAFC'
+                      : '#0F172A'
+                    : isDark
+                    ? '#94A3B8'
+                    : '#64748B',
+                  fontWeight: isFocused ? '700' : '500',
+                },
+              ]}
+              numberOfLines={1}
+            >
+              {meta.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+export default function TabLayout() {
+  return (
     <Tabs
+      tabBar={(props) => <WhatsAppBottomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarShowLabel: false,
-        tabBarStyle: [
-          styles.tabBar,
-          {
-            backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
-            borderWidth: isDark ? 1 : 0,
-            borderColor: isDark ? '#334155' : 'transparent',
-          },
-        ],
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <View
-              style={[
-                styles.iconWrap,
-                focused ? [styles.iconWrapActive, { backgroundColor: colors.primary }] : null,
-              ]}
-            >
-              <Ionicons
-                name={focused ? 'home' : 'home-outline'}
-                size={22}
-                color={focused ? '#FFFFFF' : isDark ? '#94A3B8' : '#6B7280'}
-              />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="bookings"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <View
-              style={[
-                styles.iconWrap,
-                focused ? [styles.iconWrapActive, { backgroundColor: colors.primary }] : null,
-              ]}
-            >
-              <Ionicons
-                name={focused ? 'calendar' : 'calendar-outline'}
-                size={22}
-                color={focused ? '#FFFFFF' : isDark ? '#94A3B8' : '#6B7280'}
-              />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="messages"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <View
-              style={[
-                styles.iconWrap,
-                focused ? [styles.iconWrapActive, { backgroundColor: colors.primary }] : null,
-              ]}
-            >
-              <Ionicons
-                name={focused ? 'chatbubble-ellipses' : 'chatbubble-ellipses-outline'}
-                size={22}
-                color={focused ? '#FFFFFF' : isDark ? '#94A3B8' : '#6B7280'}
-              />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <View
-              style={[
-                styles.iconWrap,
-                focused ? [styles.iconWrapActive, { backgroundColor: colors.primary }] : null,
-              ]}
-            >
-              <Ionicons
-                name={focused ? 'person' : 'person-outline'}
-                size={22}
-                color={focused ? '#FFFFFF' : isDark ? '#94A3B8' : '#6B7280'}
-              />
-            </View>
-          ),
-        }}
-      />
+      <Tabs.Screen name="index" options={{ title: 'Home' }} />
+      <Tabs.Screen name="bookings" options={{ title: 'Bookings' }} />
+      <Tabs.Screen name="messages" options={{ title: 'Messages' }} />
+      <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
     </Tabs>
   );
 }
 
 const styles = StyleSheet.create({
-  tabBar: {
-    position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 24 : 16,
-    left: 24,
-    right: 24,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 0,
+  navContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    width: '100%',
+    borderTopWidth: 1,
     elevation: 8,
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    paddingHorizontal: 8,
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    paddingTop: 8,
+  },
+  tabItem: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 2,
   },
-  iconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  iconPill: {
+    width: 56,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
   },
-  iconWrapActive: {
-    backgroundColor: Colors.primary,
+  iconPillActive: {
+    // Background color dynamically provided for theme adaptation
+  },
+  tabLabel: {
+    fontSize: 12,
+    letterSpacing: 0.2,
+    marginTop: 4,
+  },
+  unreadBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 8,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#10B981', // WhatsApp green notification badge
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 3,
+  },
+  unreadBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 9.5,
+    fontWeight: '800',
+    lineHeight: 12,
   },
 });
-
