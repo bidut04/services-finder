@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   Image,
   ScrollView,
   NativeSyntheticEvent,
@@ -149,15 +149,21 @@ export const HomePromoSlider: React.FC<HomePromoSliderProps> = ({
               </Text>
             </View>
 
-            <TouchableOpacity
-              style={styles.bookNowPill}
-              activeOpacity={0.85}
+            <Pressable
+              style={({ pressed }) => [
+                styles.bookNowPill,
+                {
+                  opacity: pressed ? 0.85 : 1,
+                  transform: [{ scale: pressed ? 0.96 : 1 }],
+                },
+              ]}
+              android_ripple={{ color: 'rgba(255, 255, 255, 0.2)' }}
               onPress={onPressSmartHome}
             >
               <Ionicons name="calendar-outline" size={13} color="#FFFFFF" />
               <Text style={styles.bookNowText}>Book Now</Text>
               <Ionicons name="arrow-forward" size={11} color="#94A3B8" />
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {/* Floating 30% OFF Circle Badge */}
@@ -192,14 +198,20 @@ export const HomePromoSlider: React.FC<HomePromoSliderProps> = ({
               Find a nearby mechanic in {cityName} &amp; get help on the spot.
             </Text>
 
-            <TouchableOpacity
-              style={styles.mechanicActionBtn}
-              activeOpacity={0.85}
+            <Pressable
+              style={({ pressed }) => [
+                styles.mechanicActionBtn,
+                {
+                  opacity: pressed ? 0.88 : 1,
+                  transform: [{ scale: pressed ? 0.96 : 1 }],
+                },
+              ]}
+              android_ripple={{ color: 'rgba(255, 255, 255, 0.2)' }}
               onPress={onPressVehicleBreakdown}
             >
               <Text style={styles.mechanicActionText}>Find Mechanic Now</Text>
               <Ionicons name="flash" size={14} color="#FFFFFF" />
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {/* Right Floating ETA & Icon Shield */}
@@ -220,10 +232,10 @@ export const HomePromoSlider: React.FC<HomePromoSliderProps> = ({
 
       {/* Pagination Dot Indicators */}
       <View style={styles.dotsRow}>
-        <TouchableOpacity
-          activeOpacity={0.7}
+        <Pressable
           onPress={() => handleDotPress(0)}
           style={styles.dotTouchable}
+          hitSlop={6}
         >
           <View
             style={[
@@ -231,12 +243,12 @@ export const HomePromoSlider: React.FC<HomePromoSliderProps> = ({
               activeIndex === 0 ? styles.activePillDot : styles.inactiveDot,
             ]}
           />
-        </TouchableOpacity>
+        </Pressable>
 
-        <TouchableOpacity
-          activeOpacity={0.7}
+        <Pressable
           onPress={() => handleDotPress(1)}
           style={styles.dotTouchable}
+          hitSlop={6}
         >
           <View
             style={[
@@ -244,7 +256,7 @@ export const HomePromoSlider: React.FC<HomePromoSliderProps> = ({
               activeIndex === 1 ? styles.activePillDotEmergency : styles.inactiveDot,
             ]}
           />
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );

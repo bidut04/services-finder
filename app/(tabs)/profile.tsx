@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, Pressable, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -81,18 +81,33 @@ export default function ProfileTab() {
           </Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.changeLocBtn}
+        <Pressable
+          style={({ pressed }) => [
+            styles.changeLocBtn,
+            {
+              opacity: pressed ? 0.75 : 1,
+              transform: [{ scale: pressed ? 0.98 : 1 }],
+            },
+          ]}
           onPress={() => router.push('/(location)/confirm')}
         >
           <Text style={[styles.changeLocText, { color: colors.primary }]}>Adjust Confirmed Location</Text>
-        </TouchableOpacity>
+        </Pressable>
 
         {/* Sign Out Button */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.logoutBtn,
+            {
+              opacity: pressed ? 0.8 : 1,
+              transform: [{ scale: pressed ? 0.98 : 1 }],
+            },
+          ]}
+          onPress={handleLogout}
+        >
           <Ionicons name="log-out-outline" size={20} color={Colors.emergency} />
           <Text style={styles.logoutText}>Sign Out</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </SafeAreaView>
   );

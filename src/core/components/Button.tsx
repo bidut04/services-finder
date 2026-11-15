@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  TouchableOpacity,
+  Pressable,
   Text,
   StyleSheet,
   ActivityIndicator,
@@ -55,16 +55,21 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.82}
+    <Pressable
       onPress={onPress}
       disabled={disabled || loading}
-      style={[
+      android_ripple={{
+        color: 'rgba(255, 255, 255, 0.12)',
+        borderless: false,
+      }}
+      style={({ pressed }) => [
         styles.button,
         {
           backgroundColor: getBackgroundColor(),
           borderWidth: isOutline ? 1.5 : 0,
           borderColor: isOutline ? '#0F172A' : 'transparent',
+          opacity: disabled ? 0.6 : pressed ? 0.88 : 1,
+          transform: [{ scale: pressed && !disabled && !loading ? 0.98 : 1 }],
         },
         style,
       ]}
@@ -80,7 +85,7 @@ export const Button: React.FC<ButtonProps> = ({
           {rightIcon && <View style={styles.rightIcon}>{rightIcon}</View>}
         </View>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

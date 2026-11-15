@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import {
-  TouchableOpacity,
+  Pressable,
   View,
   Text,
   StyleSheet,
@@ -63,14 +63,16 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
   // Variant: Settings Row for Profile / Settings
   if (variant === 'row') {
     return (
-      <TouchableOpacity
-        activeOpacity={0.8}
+      <Pressable
         onPress={toggleTheme}
-        style={[
+        android_ripple={{ color: 'rgba(0, 0, 0, 0.05)' }}
+        style={({ pressed }) => [
           styles.rowContainer,
           {
             backgroundColor: colors.surface,
             borderColor: colors.border,
+            opacity: pressed ? 0.85 : 1,
+            transform: [{ scale: pressed ? 0.99 : 1 }],
           },
           style,
         ]}
@@ -124,21 +126,23 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
             />
           </View>
         </View>
-      </TouchableOpacity>
+      </Pressable>
     );
   }
 
   // Variant: Icon Only Button
   if (variant === 'icon') {
     return (
-      <TouchableOpacity
-        activeOpacity={0.75}
+      <Pressable
         onPress={toggleTheme}
-        style={[
+        android_ripple={{ color: 'rgba(0, 0, 0, 0.08)', borderless: true, radius: 22 }}
+        style={({ pressed }) => [
           styles.iconButton,
           {
             backgroundColor: colors.surface,
             borderColor: colors.border,
+            opacity: pressed ? 0.8 : 1,
+            transform: [{ scale: pressed ? 0.92 : 1 }],
           },
           style,
         ]}
@@ -154,20 +158,22 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
             color={isDark ? '#FACC15' : '#F97316'}
           />
         </Animated.View>
-      </TouchableOpacity>
+      </Pressable>
     );
   }
 
   // Variant: Pill Button (Default)
   return (
-    <TouchableOpacity
-      activeOpacity={0.8}
+    <Pressable
       onPress={toggleTheme}
-      style={[
+      android_ripple={{ color: 'rgba(0, 0, 0, 0.08)', borderless: false }}
+      style={({ pressed }) => [
         styles.pillContainer,
         {
           backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
           borderColor: isDark ? '#334155' : '#E2E8F0',
+          opacity: pressed ? 0.85 : 1,
+          transform: [{ scale: pressed ? 0.95 : 1 }],
         },
         style,
       ]}
@@ -194,7 +200,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
           {isDark ? 'Dark' : 'Light'}
         </Text>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

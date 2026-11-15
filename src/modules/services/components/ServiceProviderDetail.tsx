@@ -4,7 +4,7 @@ import {
   Text,
   StyleSheet,
   Image,
-  TouchableOpacity,
+  Pressable,
   ScrollView,
   Platform,
   Alert,
@@ -16,7 +16,7 @@ import { Typography } from '../../../core/theme/typography';
 import { SlideUpTransition } from '../../../core/animations/SlideUpTransition';
 import { useTheme } from '../../../core/theme/themeStore';
 
-const cleanerHeroImg = require('../../../../assets/cleaner-hero-clean.png');
+const cleanerHeroImg = require('../../../../assets/cleaner-woman.png');
 
 export interface ServiceProviderDetailProps {
   id?: string;
@@ -58,6 +58,9 @@ export const ServiceProviderDetail: React.FC<ServiceProviderDetailProps> = ({
     }
   };
 
+  const formattedHourly = hourlyRate
+    ? hourlyRate.replace(/\/hr|\/Hr|\/week|\/Week/i, '').trim()
+    : '$32.00';
   const imageSource =
     imageUrl && typeof imageUrl === 'string' && imageUrl.trim().length > 0
       ? { uri: imageUrl }
@@ -78,14 +81,17 @@ export const ServiceProviderDetail: React.FC<ServiceProviderDetailProps> = ({
         <View style={[styles.topHeroSection, { backgroundColor: isDark ? '#1E293B' : '#EDF5FF' }]}>
           {/* Header Bar: < Back */}
           <SafeAreaView edges={['top']} style={styles.topHeaderBar}>
-            <TouchableOpacity
+            <Pressable
               onPress={onBack}
-              style={styles.backButton}
-              activeOpacity={0.7}
+              style={({ pressed }) => [
+                styles.backButton,
+                { opacity: pressed ? 0.7 : 1, transform: [{ scale: pressed ? 0.96 : 1 }] },
+              ]}
+              hitSlop={8}
             >
               <Ionicons name="chevron-back" size={20} color="#0284C7" />
               <Text style={styles.backText}>Back</Text>
-            </TouchableOpacity>
+            </Pressable>
           </SafeAreaView>
 
           {/* Hero Row: Left Meta + Right Cleaner Image */}
@@ -170,9 +176,12 @@ export const ServiceProviderDetail: React.FC<ServiceProviderDetailProps> = ({
               <Text style={[styles.sectionHeading, { color: isDark ? colors.textPrimary : '#0F172A' }]}>
                 Review From Client
               </Text>
-              <TouchableOpacity activeOpacity={0.7}>
+              <Pressable
+                style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+                hitSlop={8}
+              >
                 <Text style={styles.viewAllLink}>View all</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
 
             {/* Review Card */}
@@ -212,19 +221,25 @@ export const ServiceProviderDetail: React.FC<ServiceProviderDetailProps> = ({
           {/* Hourly Rate Pill: $32.00/hr */}
           <View style={[styles.hourlyRatePill, { backgroundColor: isDark ? colors.surface : '#F1F5F9' }]}>
             <Text style={[styles.hourlyAmountText, { color: isDark ? colors.textPrimary : '#0F172A' }]}>
-              {hourlyRate}
+              {formattedHourly}
             </Text>
             <Text style={styles.hourlyUnitText}>/hr</Text>
           </View>
 
           {/* Book Now Button: Deep Navy #0F172A */}
-          <TouchableOpacity
-            style={styles.bookNowBtn}
-            activeOpacity={0.85}
+          <Pressable
+            style={({ pressed }) => [
+              styles.bookNowBtn,
+              {
+                opacity: pressed ? 0.88 : 1,
+                transform: [{ scale: pressed ? 0.98 : 1 }],
+              },
+            ]}
+            android_ripple={{ color: 'rgba(255, 255, 255, 0.15)' }}
             onPress={handleBooking}
           >
             <Text style={styles.bookNowBtnText}>Book Now</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </SafeAreaView>
     </View>
@@ -350,8 +365,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cleanerPhoto: {
-    width: '100%',
-    height: '100%',
+    width: 165,
+    height: 220,
     marginBottom: -2,
   },
 

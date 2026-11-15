@@ -5,7 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   Image,
   ActivityIndicator,
   Platform,
@@ -107,17 +107,24 @@ export default function HomeDashboardScreen() {
           <View style={styles.headerBar}>
             <View style={styles.headerLeftCol}>
               {/* Location Chip */}
-              <TouchableOpacity
+              <Pressable
                 onPress={() => router.push('/(location)/confirm')}
-                style={[styles.locationPill, { backgroundColor: colors.surface, borderColor: colors.border }]}
-                activeOpacity={0.7}
+                style={({ pressed }) => [
+                  styles.locationPill,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.border,
+                    opacity: pressed ? 0.8 : 1,
+                    transform: [{ scale: pressed ? 0.97 : 1 }],
+                  },
+                ]}
               >
                 <Ionicons name="location-sharp" size={12} color={colors.primary} />
                 <Text style={[styles.locationText, { color: colors.textSecondary }]} numberOfLines={1}>
                   {cityName}, {stateName}
                 </Text>
                 <Ionicons name="chevron-down" size={11} color={colors.textSecondary} />
-              </TouchableOpacity>
+              </Pressable>
 
               <Text style={[styles.welcomeSub, { color: colors.textSecondary }]}>Welcome back</Text>
               <Text style={[styles.userName, { color: colors.textPrimary }]}>Hello, {user?.name || 'Palash'}</Text>
@@ -127,20 +134,27 @@ export default function HomeDashboardScreen() {
             <View style={styles.headerRightCol}>
               <ThemeSwitcher variant="icon" />
 
-              <TouchableOpacity
-                style={[styles.bellButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
-                activeOpacity={0.75}
+              <Pressable
+                style={({ pressed }) => [
+                  styles.bellButton,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.border,
+                    opacity: pressed ? 0.8 : 1,
+                    transform: [{ scale: pressed ? 0.93 : 1 }],
+                  },
+                ]}
               >
                 <Ionicons name="notifications-outline" size={20} color={colors.textPrimary} />
                 <View style={styles.bellBadgeDot} />
-              </TouchableOpacity>
+              </Pressable>
 
-              <TouchableOpacity
+              <Pressable
                 onPress={() => router.push('/(tabs)/profile')}
-                activeOpacity={0.8}
+                style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.94 : 1 }] }]}
               >
                 <Image source={userAvatarImg} style={styles.avatar} />
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         </ScrubberItem>
@@ -154,12 +168,18 @@ export default function HomeDashboardScreen() {
               placeholder="Search For service..."
               placeholderTextColor={colors.textMuted}
             />
-            <TouchableOpacity
-              style={[styles.filterBtn, { backgroundColor: colors.borderLight }]}
-              activeOpacity={0.7}
+            <Pressable
+              style={({ pressed }) => [
+                styles.filterBtn,
+                {
+                  backgroundColor: colors.borderLight,
+                  opacity: pressed ? 0.75 : 1,
+                  transform: [{ scale: pressed ? 0.93 : 1 }],
+                },
+              ]}
             >
               <Ionicons name="options-outline" size={19} color={colors.textPrimary} />
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </ScrubberItem>
 
@@ -167,9 +187,12 @@ export default function HomeDashboardScreen() {
         <ScrubberItem index={2} slideDistance={22}>
           <View style={styles.sectionHeaderRow}>
             <Text style={[styles.sectionHeading, { color: colors.textPrimary }]}>Categories</Text>
-            <TouchableOpacity activeOpacity={0.7}>
+            <Pressable
+              style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+              hitSlop={8}
+            >
               <Text style={[styles.viewAllText, { color: colors.textSecondary }]}>View All</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           <CategoryList
@@ -204,9 +227,12 @@ export default function HomeDashboardScreen() {
         <ScrubberItem index={4} slideDistance={26}>
           <View style={styles.sectionHeaderRow}>
             <Text style={[styles.sectionHeading, { color: colors.textPrimary }]}>Popular services</Text>
-            <TouchableOpacity activeOpacity={0.7}>
+            <Pressable
+              style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+              hitSlop={8}
+            >
               <Text style={[styles.viewAllText, { color: colors.textSecondary }]}>View All</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {popularServices.map((service) => (
@@ -376,6 +402,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   bottomSpacer: {
-    height: Platform.OS === 'ios' ? 100 : 90,
+    height: 28,
   },
 });

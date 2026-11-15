@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../core/theme/colors';
 import { Spacing } from '../../../core/theme/spacing';
@@ -24,14 +24,20 @@ export const EmergencyBanner: React.FC<EmergencyBannerProps> = ({
         <Text style={styles.subtitle}>
           Find a nearby mechanic in {cityName} and get help wherever you are.
         </Text>
-        <TouchableOpacity
-          activeOpacity={0.85}
-          style={styles.actionBtn}
+        <Pressable
+          style={({ pressed }) => [
+            styles.actionBtn,
+            {
+              opacity: pressed ? 0.88 : 1,
+              transform: [{ scale: pressed ? 0.97 : 1 }],
+            },
+          ]}
+          android_ripple={{ color: 'rgba(255, 255, 255, 0.2)' }}
           onPress={onPressFindMechanic}
         >
           <Text style={styles.actionText}>Find Mechanic Now</Text>
           <Ionicons name="flash" size={16} color="#FFFFFF" />
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );

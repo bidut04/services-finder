@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../core/theme/colors';
 import { Spacing } from '../../../core/theme/spacing';
@@ -46,16 +46,20 @@ export const PopularServiceCard: React.FC<PopularServiceCardProps> = ({
           Starting <Text style={[styles.priceBold, { color: colors.primary }]}>{service.price}</Text>
         </Text>
       </View>
-      <TouchableOpacity
-        style={[
+      <Pressable
+        style={({ pressed }) => [
           styles.bookBtn,
           isDark ? { borderWidth: 1, borderColor: '#334155' } : null,
+          {
+            opacity: pressed ? 0.85 : 1,
+            transform: [{ scale: pressed ? 0.95 : 1 }],
+          },
         ]}
-        activeOpacity={0.8}
+        android_ripple={{ color: 'rgba(255, 255, 255, 0.2)' }}
         onPress={() => onBookNow(service)}
       >
         <Text style={styles.bookBtnText}>Book Now</Text>
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 };

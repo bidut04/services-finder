@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../core/theme/colors';
 import { Spacing } from '../../../core/theme/spacing';
@@ -18,12 +18,15 @@ export const AddressCard: React.FC<AddressCardProps> = ({
   onSelect,
 }) => {
   return (
-    <TouchableOpacity
-      activeOpacity={0.85}
+    <Pressable
       onPress={() => onSelect?.(address)}
-      style={[
+      style={({ pressed }) => [
         styles.card,
         isSelected ? styles.cardSelected : null,
+        {
+          opacity: pressed ? 0.85 : 1,
+          transform: [{ scale: pressed ? 0.98 : 1 }],
+        },
       ]}
     >
       <View style={styles.iconContainer}>
@@ -51,7 +54,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
       {isSelected && (
         <Ionicons name="checkmark-circle" size={24} color={Colors.success} />
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

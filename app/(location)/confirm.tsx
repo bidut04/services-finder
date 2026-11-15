@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   TextInput,
   ScrollView,
   Animated,
@@ -84,12 +84,16 @@ export default function ConfirmLocationScreen() {
           {/* Search Header */}
           <ScrubberItem index={0} slideDistance={10}>
             <View style={styles.header}>
-              <TouchableOpacity
+              <Pressable
                 onPress={handleBack}
-                style={styles.backButton}
+                style={({ pressed }) => [
+                  styles.backButton,
+                  { opacity: pressed ? 0.7 : 1, transform: [{ scale: pressed ? 0.94 : 1 }] },
+                ]}
+                hitSlop={8}
               >
-            <Ionicons name="arrow-back" size={22} color={Colors.textPrimary} />
-          </TouchableOpacity>
+                <Ionicons name="arrow-back" size={22} color={Colors.textPrimary} />
+              </Pressable>
           <View style={styles.searchBar}>
             <Ionicons name="search" size={20} color={Colors.textMuted} />
             <TextInput
@@ -136,12 +140,15 @@ export default function ConfirmLocationScreen() {
           <Text style={styles.sectionSubtitle}>Nearby Service Hubs</Text>
           <View style={styles.chipRow}>
             {['Daspur', 'Ghatal', 'Medinipur', 'Kharagpur'].map((city) => (
-              <TouchableOpacity
+              <Pressable
                 key={city}
-                activeOpacity={0.7}
-                style={[
+                style={({ pressed }) => [
                   styles.cityChip,
                   activeAddress.city === city ? styles.activeChip : null,
+                  {
+                    opacity: pressed ? 0.8 : 1,
+                    transform: [{ scale: pressed ? 0.96 : 1 }],
+                  },
                 ]}
                 onPress={() =>
                   handleSelectQuickLocation(city, 'Paschim Medinipur')
@@ -155,7 +162,7 @@ export default function ConfirmLocationScreen() {
                 >
                   📍 {city}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
 
@@ -163,9 +170,15 @@ export default function ConfirmLocationScreen() {
             <View style={styles.savedSection}>
               <Text style={styles.sectionSubtitle}>Saved Addresses</Text>
               {savedAddresses.map((addr) => (
-                <TouchableOpacity
+                <Pressable
                   key={addr.id}
-                  style={styles.savedItem}
+                  style={({ pressed }) => [
+                    styles.savedItem,
+                    {
+                      opacity: pressed ? 0.8 : 1,
+                      transform: [{ scale: pressed ? 0.98 : 1 }],
+                    },
+                  ]}
                   onPress={() => selectManualAddress(addr)}
                 >
                   <Ionicons
@@ -177,7 +190,7 @@ export default function ConfirmLocationScreen() {
                   <Text style={styles.savedAddressText} numberOfLines={1}>
                     {addr.formattedAddress}
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               ))}
             </View>
           )}

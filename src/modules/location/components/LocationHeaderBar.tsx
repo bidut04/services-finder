@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../../core/theme/colors';
 import { Spacing } from '../../../core/theme/spacing';
@@ -23,10 +23,15 @@ export const LocationHeaderBar: React.FC<LocationHeaderBarProps> = ({
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        activeOpacity={0.8}
+      <Pressable
         onPress={onChangeLocation}
-        style={styles.locationButton}
+        style={({ pressed }) => [
+          styles.locationButton,
+          {
+            opacity: pressed ? 0.8 : 1,
+            transform: [{ scale: pressed ? 0.98 : 1 }],
+          },
+        ]}
       >
         <View style={styles.pinCircle}>
           <Ionicons name="location-sharp" size={18} color={Colors.primary} />
@@ -40,16 +45,21 @@ export const LocationHeaderBar: React.FC<LocationHeaderBarProps> = ({
           </View>
           <Text style={styles.changeSubtext}>Change Location</Text>
         </View>
-      </TouchableOpacity>
+      </Pressable>
 
-      <TouchableOpacity
-        activeOpacity={0.8}
+      <Pressable
         onPress={onNotificationPress}
-        style={styles.bellButton}
+        style={({ pressed }) => [
+          styles.bellButton,
+          {
+            opacity: pressed ? 0.8 : 1,
+            transform: [{ scale: pressed ? 0.93 : 1 }],
+          },
+        ]}
       >
         <Ionicons name="notifications-outline" size={22} color={Colors.textPrimary} />
         <View style={styles.notificationDot} />
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 };
