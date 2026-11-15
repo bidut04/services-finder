@@ -284,6 +284,65 @@ export const userApi = {
   },
 
   /**
+   * Location: Reverse Geocoding (OpenStreetMap Nominatim via Backend Cache)
+   */
+  async reverseGeocode(latitude: number, longitude: number): Promise<any> {
+    const res = await apiClient<{ success: boolean; data: any }>(
+      `/location/reverse-geocode?latitude=${latitude}&longitude=${longitude}`
+    );
+    return res.data;
+  },
+
+  /**
+   * Location: Search Address Autocomplete
+   */
+  async searchAddress(query: string, latBias?: number, lngBias?: number): Promise<any[]> {
+    let url = `/location/search?query=${encodeURIComponent(query)}`;
+    if (latBias !== undefined && lngBias !== undefined) {
+      url += `&latBias=${latBias}&lngBias=${lngBias}`;
+    }
+    const res = await apiClient<{ success: boolean; data: any[] }>(url);
+    return res.data || [];
+  },
+
+  /**
+   * Location: Discover Nearby Captains via Redis GEO
+   */
+  async getNearbyCaptains(latitude: number, longitude: number, radiusKm = 15, categoryId?: string): Promise<any[]> {
+    let url = `/location/nearby-captains?latitude=${latitude}&longitude=${longitude}&radiusKm=${radiusKm}`;
+    if (categoryId) url += `&categoryId=${encodeURIComponent(categoryId)}`;
+    const res = await apiClient<{ success: boolean; data: any[] }>(url);
+    return res.data || [];
+  },
+
+  /**
+   * Location: Get Customer Saved Addresses
+   */
+  async getCustomerAddresses(): Promise<any[]> {
+    const res = await apiClient<{ success: boolean; data: any[] }>('/location/addresses');
+    return res.data || [];
+  },
+
+  /**
+   * Location: Save Customer Address
+   */
+  async saveCustomerAddress(data: any): Promise<any> {
+    const res = await apiClient<{ success: boolean; data: any }>('/location/addresses', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return res.data;
+  },
+
+  /**
+   * Location: Delete Customer Address
+   */
+  async deleteCustomerAddress(id: string): Promise<boolean> {
+    await apiClient(`/location/addresses/${id}`, { method: 'DELETE' });
+    return true;
+  },
+
+  /**
    * Terminate active user session
    */
   async logout(refreshToken?: string): Promise<{ success: boolean; message: string }> {

@@ -1,24 +1,27 @@
 import * as Location from 'expo-location';
+import { Linking, Platform } from 'react-native';
 import { PermissionStatusType } from '../types/location.types';
 
 export class LocationPermissionService {
   /**
-   * Checks current permission status without prompting
+   * Checks current permission status without prompting user
    */
   public static async checkPermission(): Promise<PermissionStatusType> {
     try {
-      const { status, canAskAgain } =
-        await Location.getForegroundPermissionsAsync();
+      const res = await Location.getForegroundPermissionsAsync();
 
-      if (status === Location.PermissionStatus.GRANTED) {
+      if (res.status === Location.PermissionStatus.GRANTED) {
+        if ((res as any).android?.accuracy === 'coarse' || (res as any).scope === 'approximate') {
+          return 'approximate';
+        }
         return 'granted';
       }
 
-      if (status === Location.PermissionStatus.DENIED && !canAskAgain) {
+      if (res.status === Location.PermissionStatus.DENIED && !res.canAskAgain) {
         return 'permanently_denied';
       }
 
-      if (status === Location.PermissionStatus.DENIED) {
+      if (res.status === Location.PermissionStatus.DENIED) {
         return 'denied';
       }
 
@@ -29,18 +32,20 @@ export class LocationPermissionService {
   }
 
   /**
-   * Requests foreground location permission from device
+   * Requests foreground location permission from device with explanation handling
    */
   public static async requestPermission(): Promise<PermissionStatusType> {
     try {
-      const { status, canAskAgain } =
-        await Location.requestForegroundPermissionsAsync();
+      const res = await Location.requestForegroundPermissionsAsync();
 
-      if (status === Location.PermissionStatus.GRANTED) {
+      if (res.status === Location.PermissionStatus.GRANTED) {
+        if ((res as any).android?.accuracy === 'coarse' || (res as any).scope === 'approximate') {
+          return 'approximate';
+        }
         return 'granted';
       }
 
-      if (status === Location.PermissionStatus.DENIED && !canAskAgain) {
+      if (res.status === Location.PermissionStatus.DENIED && !res.canAskAgain) {
         return 'permanently_denied';
       }
 
@@ -49,5 +54,19 @@ export class LocationPermissionService {
       return 'denied';
     }
   }
-}
 
+  /**
+   * Guides user to OS system settings if permission was permanently denied
+   */
+  public static async openAppSettings(): Promise<void> {
+    try {
+      if (Platform.OS === 'ios') {
+        await Linking.openURL('app-settings:');
+      } else {
+        await Linking.openSettings();
+      }
+    } catch (err: any) {
+      console.warn('[LocationPermissionService.openAppSettings]:', err.message);
+    }
+  }
+}

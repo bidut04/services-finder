@@ -7,6 +7,7 @@ import {
   TextInput,
   ScrollView,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,13 +27,17 @@ import {
 } from '../../src/core/animations/SmoothScreenWrapper';
 
 import { SavedAddressService } from '../../src/modules/location/services/SavedAddressService';
+import { userApi } from '../../src/api/user.api';
 
 export default function ConfirmLocationScreen() {
   const router = useRouter();
-  const { selectedAddress, savedAddresses, selectManualAddress } =
+  const { selectedAddress, savedAddresses, selectManualAddress, saveAddressToBackend } =
     useLocationStore();
   const { setLocationFlowCompleted } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTag, setSelectedTag] = useState<'Home' | 'Work' | 'Other'>('Home');
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   const activeAddress: UserAddress = selectedAddress || {
     id: 'default_daspur',
@@ -47,12 +52,61 @@ export default function ConfirmLocationScreen() {
     isCurrentLocation: true,
   };
 
+  // Live OpenStreetMap Address Autocomplete (Free & Open Source)
+  React.useEffect(() => {
+    if (!searchQuery || searchQuery.trim().length < 3) {
+      setSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const results = await userApi.searchAddress(
+          searchQuery.trim(),
+          activeAddress.coordinates.latitude,
+          activeAddress.coordinates.longitude
+        );
+        setSuggestions(results || []);
+      } catch {
+        setSuggestions([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, activeAddress.coordinates.latitude, activeAddress.coordinates.longitude]);
+
+  const handleSelectSuggestion = (s: any) => {
+    const updated: UserAddress = {
+      id: `addr_${Date.now()}`,
+      formattedAddress: s.displayName,
+      street: s.displayName.split(',')[0] || '',
+      city: s.city || activeAddress.city,
+      district: activeAddress.district,
+      state: s.state || activeAddress.state,
+      postalCode: activeAddress.postalCode,
+      country: s.country || 'India',
+      coordinates: s.coordinates,
+      label: selectedTag,
+    };
+    selectManualAddress(updated);
+    setSearchQuery('');
+    setSuggestions([]);
+  };
+
   const { exitAnimStyle, navigateWithExit } = useScreenTransition();
 
   const handleConfirmLocation = () => {
-    selectManualAddress(activeAddress);
+    const finalAddress: UserAddress = {
+      ...activeAddress,
+      label: selectedTag,
+    };
+    selectManualAddress(finalAddress);
     setLocationFlowCompleted(true);
-    SavedAddressService.saveAddress(activeAddress).catch((err) =>
+    saveAddressToBackend(finalAddress);
+    SavedAddressService.saveAddress(finalAddress).catch((err) =>
       console.warn('[Address Save Warning]:', err.message)
     );
     navigateWithExit(() => router.replace('/(tabs)'));
@@ -103,8 +157,34 @@ export default function ConfirmLocationScreen() {
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
+            {isSearching && <ActivityIndicator size="small" color={Colors.primary} style={{ marginLeft: 6 }} />}
           </View>
         </View>
+
+        {/* Live Nominatim Autocomplete Suggestions */}
+        {suggestions.length > 0 && (
+          <View style={styles.suggestionsOverlay}>
+            <ScrollView style={{ maxHeight: 220 }} keyboardShouldPersistTaps="handled">
+              {suggestions.map((s, idx) => (
+                <Pressable
+                  key={s.placeId || idx}
+                  style={styles.suggestionRow}
+                  onPress={() => handleSelectSuggestion(s)}
+                >
+                  <Ionicons name="location-outline" size={18} color={Colors.primary} />
+                  <View style={styles.suggestionTextCol}>
+                    <Text style={styles.suggestionMain} numberOfLines={1}>
+                      {s.displayName.split(',')[0]}
+                    </Text>
+                    <Text style={styles.suggestionDetail} numberOfLines={1}>
+                      {s.displayName}
+                    </Text>
+                  </View>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        )}
       </ScrubberItem>
 
       {/* Reusable Simulated Map Preview with Pin */}
@@ -194,6 +274,35 @@ export default function ConfirmLocationScreen() {
               ))}
             </View>
           )}
+
+          {/* Address Tag Selector (Home, Work, Other) */}
+          <Text style={styles.sectionSubtitle}>Save Address As</Text>
+          <View style={styles.tagRow}>
+            {(['Home', 'Work', 'Other'] as const).map((tag) => (
+              <Pressable
+                key={tag}
+                style={[
+                  styles.tagChip,
+                  selectedTag === tag ? styles.activeTagChip : null,
+                ]}
+                onPress={() => setSelectedTag(tag)}
+              >
+                <Ionicons
+                  name={tag === 'Home' ? 'home' : tag === 'Work' ? 'briefcase' : 'bookmark'}
+                  size={14}
+                  color={selectedTag === tag ? '#FFFFFF' : Colors.textPrimary}
+                />
+                <Text
+                  style={[
+                    styles.tagChipText,
+                    selectedTag === tag ? styles.activeTagChipText : null,
+                  ]}
+                >
+                  {tag}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
 
           <Button
             title="Confirm Location & Continue"
@@ -349,5 +458,69 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     marginTop: Spacing.sm,
+  },
+  suggestionsOverlay: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 12,
+    marginHorizontal: Spacing.md,
+    marginTop: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    zIndex: 999,
+  },
+  suggestionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.borderLight,
+  },
+  suggestionTextCol: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  suggestionMain: {
+    ...Typography.bodySmall,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+  },
+  suggestionDetail: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  tagRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: Spacing.md,
+  },
+  tagChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.borderLight,
+  },
+  activeTagChip: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  tagChipText: {
+    ...Typography.bodySmall,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  activeTagChipText: {
+    color: '#FFFFFF',
   },
 });
