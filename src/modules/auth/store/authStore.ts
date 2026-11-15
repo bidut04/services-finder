@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { AuthState } from '../types/auth.types';
 import { AuthService } from '../services/authService';
-import { eventMessenger } from '../../../core/components/EventMessenger';
 import { toast } from '../../../core/components/Toast';
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -24,25 +23,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         hasCompletedLocationFlow: false,
       });
 
-      eventMessenger.emit({
-        title: 'Authentication Successful',
-        message: `Welcome back, ${response.user.name || 'User'}! Connected with verified credentials.`,
-        type: 'success',
-        category: 'auth',
-      });
-
       return true;
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Login failed. Please check your credentials.';
       set({ error: errorMessage, isLoading: false });
-
-      eventMessenger.emit({
-        title: 'Login Attempt Failed',
-        message: errorMessage,
-        type: 'error',
-        category: 'auth',
-      });
 
       return false;
     }
@@ -60,25 +45,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         hasCompletedLocationFlow: false,
       });
 
-      eventMessenger.emit({
-        title: 'Account Registered',
-        message: `Welcome to HelpNear, ${name}! Your account has been provisioned.`,
-        type: 'success',
-        category: 'auth',
-      });
-
       return true;
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Registration failed. Please try again.';
       set({ error: errorMessage, isLoading: false });
-
-      eventMessenger.emit({
-        title: 'Registration Error',
-        message: errorMessage,
-        type: 'error',
-        category: 'auth',
-      });
 
       return false;
     }

@@ -9,7 +9,6 @@ import {
 import { useLocationStore } from '../src/modules/location/store/locationStore';
 import { useTheme } from '../src/core/theme/themeStore';
 import { userApi } from '../src/api/user.api';
-import { eventMessenger } from '../src/core/components/EventMessenger';
 import { toast } from '../src/core/components/Toast';
 
 export default function ProviderDetailScreen() {

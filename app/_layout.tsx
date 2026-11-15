@@ -12,7 +12,6 @@ import {
   PlusJakartaSans_800ExtraBold,
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { gsapScreenOptions } from '../src/core/animations/pageTransitions';
-import { EventMessenger } from '../src/core/components/EventMessenger';
 import { ToastContainer } from '../src/core/components/Toast';
 
 const queryClient = new QueryClient();
@@ -50,9 +49,6 @@ export default function RootLayout() {
           <Stack.Screen name="provider-detail" />
           <Stack.Screen name="(tabs)" />
         </Stack>
-
-        {/* Global Realtime Event Messenger in Top-Right across entire project */}
-        <EventMessenger />
 
         {/* Global Floating Toast Notifications (Success, Failed, Warn) */}
         <ToastContainer />
