@@ -19,6 +19,7 @@ import { useLocationStore } from '../../src/modules/location/store/locationStore
 import { useAuthStore } from '../../src/modules/auth/store/authStore';
 import { useTheme } from '../../src/core/theme/themeStore';
 import { ThemeSwitcher } from '../../src/core/components/ThemeSwitcher';
+import { eventMessenger } from '../../src/core/components/EventMessenger';
 import { StatusBar } from 'expo-status-bar';
 import { CategoryList } from '../../src/modules/services/components/CategoryList';
 import { PopularServiceCard } from '../../src/modules/services/components/PopularServiceCard';
@@ -135,6 +136,7 @@ export default function HomeDashboardScreen() {
               <ThemeSwitcher variant="icon" />
 
               <Pressable
+                onPress={() => eventMessenger.open()}
                 style={({ pressed }) => [
                   styles.bellButton,
                   {

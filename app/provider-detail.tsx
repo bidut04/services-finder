@@ -9,6 +9,7 @@ import {
 import { useLocationStore } from '../src/modules/location/store/locationStore';
 import { useTheme } from '../src/core/theme/themeStore';
 import { userApi } from '../src/api/user.api';
+import { eventMessenger } from '../src/core/components/EventMessenger';
 
 export default function ProviderDetailScreen() {
   const router = useRouter();
@@ -55,6 +56,13 @@ export default function ProviderDetailScreen() {
       });
 
       const message = `Booking confirmed! Reference: ${res.booking.bookingCode}. A nearby partner has been assigned.`;
+
+      eventMessenger.emit({
+        title: 'Booking Confirmed!',
+        message: `Reference #${res.booking.bookingCode} for ${serviceName}. Captain dispatched.`,
+        type: 'success',
+        category: 'booking',
+      });
 
       if (Platform.OS === 'web') {
         window.alert(message);
