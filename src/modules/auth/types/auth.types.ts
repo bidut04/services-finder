@@ -14,6 +14,7 @@ export interface AuthState {
   isLoading: boolean;
   error: string | null;
   hasCompletedLocationFlow: boolean;
+  isHydrated: boolean;
 
   // Actions (Username/Phone & Password - NO OTP)
   login: (identifier: string, password: string) => Promise<boolean>;
@@ -21,4 +22,5 @@ export interface AuthState {
   logout: () => void;
   setLocationFlowCompleted: (completed: boolean) => void;
   clearError: () => void;
+  setHydrated: (hydrated: boolean) => void;
 }

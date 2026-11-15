@@ -22,6 +22,7 @@ import { DragToStartButton } from '../src/core/components/DragToStartButton';
 import { useReduceMotion } from '../src/core/animations/useReduceMotion';
 import { useTheme } from '../src/core/theme/themeStore';
 import { ThemeSwitcher } from '../src/core/components/ThemeSwitcher';
+import { useAuthStore } from '../src/modules/auth/store/authStore';
 
 const { width, height } = Dimensions.get('window');
 
@@ -42,6 +43,17 @@ export default function WelcomeScreen() {
   const reduceMotion = useReduceMotion();
   const { isDark, colors } = useTheme();
   const screenRef = useRef<any>(null);
+
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const token = useAuthStore((s) => s.token);
+  const isHydrated = useAuthStore((s) => s.isHydrated);
+
+  // WhatsApp / Zomato instant resume: If already logged in, immediately switch to tabs
+  useEffect(() => {
+    if (isHydrated && isAuthenticated && token) {
+      router.replace('/(tabs)');
+    }
+  }, [isHydrated, isAuthenticated, token, router]);
 
   // Deep entrance and exit animated values:
   // - Entrance: Deep slide (44px -> 0px) + Deep fade (0 -> 1)

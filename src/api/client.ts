@@ -1,5 +1,8 @@
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const AUTH_TOKEN_STORAGE_KEY = '@helpnear_customer_token';
 
 const getDevHost = () => {
   // 1. If running in Expo Go on physical device, auto-resolve computer LAN IP
@@ -27,10 +30,26 @@ let inMemoryToken: string | null = null;
 
 export const setAuthToken = (token: string | null) => {
   inMemoryToken = token;
+  if (token) {
+    AsyncStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token).catch(() => {});
+  } else {
+    AsyncStorage.removeItem(AUTH_TOKEN_STORAGE_KEY).catch(() => {});
+  }
 };
 
 export const getAuthToken = (): string | null => {
   return inMemoryToken;
+};
+
+export const initAuthToken = async (): Promise<string | null> => {
+  try {
+    const stored = await AsyncStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+    if (stored) {
+      inMemoryToken = stored;
+      return stored;
+    }
+  } catch {}
+  return null;
 };
 
 export class ApiError extends Error {
