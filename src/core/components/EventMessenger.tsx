@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { create } from 'zustand';
 import { Typography } from '../theme/typography';
 import { useTheme } from '../theme/themeStore';
+import { toast } from './Toast';
 
 const { width } = Dimensions.get('window');
 
@@ -120,6 +121,17 @@ export const useEventMessengerStore = create<EventMessengerState>((set, get) => 
       activeToast: eventItem,
       unreadCount: state.isOpen ? 0 : state.unreadCount + 1,
     }));
+
+    // Trigger universal floating toast (success, failed, warn, info)
+    if (newEvent.type === 'success') {
+      toast.success(newEvent.title, newEvent.message);
+    } else if (newEvent.type === 'error') {
+      toast.failed(newEvent.title, newEvent.message);
+    } else if (newEvent.type === 'warning') {
+      toast.warn(newEvent.title, newEvent.message);
+    } else {
+      toast.info(newEvent.title, newEvent.message);
+    }
   },
 
   dismissToast: () => set({ activeToast: null }),
@@ -212,51 +224,6 @@ export const EventMessenger: React.FC = () => {
 
   const [chatInput, setChatInput] = useState('');
 
-  // Toast animation & auto-dismiss
-  const toastSlideAnim = useRef(new Animated.Value(-120)).current;
-  const toastOpacityAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (activeToast) {
-      Animated.parallel([
-        Animated.spring(toastSlideAnim, {
-          toValue: 0,
-          useNativeDriver: true,
-          tension: 70,
-          friction: 9,
-        }),
-        Animated.timing(toastOpacityAnim, {
-          toValue: 1,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      const timer = setTimeout(() => {
-        hideToast();
-      }, 4200);
-
-      return () => clearTimeout(timer);
-    }
-  }, [activeToast]);
-
-  const hideToast = () => {
-    Animated.parallel([
-      Animated.timing(toastSlideAnim, {
-        toValue: -80,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-      Animated.timing(toastOpacityAnim, {
-        toValue: 0,
-        duration: 220,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      dismissToast();
-    });
-  };
-
   const handleSendChat = () => {
     if (!chatInput.trim()) return;
     sendChatMessage(chatInput);
@@ -345,79 +312,7 @@ export const EventMessenger: React.FC = () => {
       </View>
 
       {/* -------------------------------------------------------- */}
-      {/* 2. TOP RIGHT FLOATING REAL-TIME TOAST NOTIFICATION       */}
-      {/* -------------------------------------------------------- */}
-      {activeToast && (
-        <Animated.View
-          style={[
-            styles.toastCard,
-            {
-              top: Math.max(insets.top, 14) + 52,
-              transform: [{ translateY: toastSlideAnim }],
-              opacity: toastOpacityAnim,
-              backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
-              borderColor: isDark ? '#334155' : '#E2E8F0',
-            },
-          ]}
-        >
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => {
-              hideToast();
-              useEventMessengerStore.getState().open();
-            }}
-            style={styles.toastInnerRow}
-          >
-            <View
-              style={[
-                styles.toastIconBox,
-                { backgroundColor: getEventIcon(activeToast.type).bg },
-              ]}
-            >
-              <Ionicons
-                name={getEventIcon(activeToast.type).name}
-                size={20}
-                color={getEventIcon(activeToast.type).color}
-              />
-            </View>
-
-            <View style={styles.toastTextCol}>
-              <View style={styles.toastHeaderRow}>
-                <Text
-                  style={[
-                    styles.toastTitle,
-                    { color: isDark ? '#F8FAFC' : '#0F172A' },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {activeToast.title}
-                </Text>
-                <Text style={styles.toastTime}>{activeToast.timestamp}</Text>
-              </View>
-              <Text
-                style={[
-                  styles.toastMessage,
-                  { color: isDark ? '#94A3B8' : '#475569' },
-                ]}
-                numberOfLines={2}
-              >
-                {activeToast.message}
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              onPress={hideToast}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              style={styles.toastCloseBtn}
-            >
-              <Ionicons name="close" size={16} color={isDark ? '#94A3B8' : '#64748B'} />
-            </TouchableOpacity>
-          </TouchableOpacity>
-        </Animated.View>
-      )}
-
-      {/* -------------------------------------------------------- */}
-      {/* 3. EXPANDED EVENT MESSENGER DRAWER / MODAL               */}
+      {/* 2. EXPANDED EVENT MESSENGER DRAWER / MODAL               */}
       {/* -------------------------------------------------------- */}
       {isOpen && (
         <View style={styles.modalBackdrop}>
@@ -793,66 +688,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 10,
     fontWeight: '800',
-  },
-
-  /* Realtime Toast */
-  toastCard: {
-    position: 'absolute',
-    right: 14,
-    left: 14,
-    maxWidth: 420,
-    alignSelf: 'flex-end',
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.16,
-    shadowRadius: 12,
-    elevation: 10,
-    zIndex: 10000,
-  },
-  toastInnerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  toastIconBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  toastTextCol: {
-    flex: 1,
-  },
-  toastHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 2,
-  },
-  toastTitle: {
-    ...Typography.h3,
-    fontSize: 13.5,
-    fontWeight: '800',
-    flex: 1,
-    marginRight: 8,
-  },
-  toastTime: {
-    ...Typography.caption,
-    fontSize: 10.5,
-    color: '#94A3B8',
-  },
-  toastMessage: {
-    ...Typography.bodySmall,
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  toastCloseBtn: {
-    padding: 4,
-    marginLeft: 6,
   },
 
   /* Full Screen Backdrop & Drawer Sheet */

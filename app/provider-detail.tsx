@@ -10,6 +10,7 @@ import { useLocationStore } from '../src/modules/location/store/locationStore';
 import { useTheme } from '../src/core/theme/themeStore';
 import { userApi } from '../src/api/user.api';
 import { eventMessenger } from '../src/core/components/EventMessenger';
+import { toast } from '../src/core/components/Toast';
 
 export default function ProviderDetailScreen() {
   const router = useRouter();
@@ -57,15 +58,12 @@ export default function ProviderDetailScreen() {
 
       const message = `Booking confirmed! Reference: ${res.booking.bookingCode}. A nearby partner has been assigned.`;
 
-      eventMessenger.emit({
-        title: 'Booking Confirmed!',
-        message: `Reference #${res.booking.bookingCode} for ${serviceName}. Captain dispatched.`,
-        type: 'success',
-        category: 'booking',
-      });
+      toast.success(
+        'Booking Confirmed!',
+        `Reference #${res.booking.bookingCode} for ${serviceName}. Captain dispatched.`
+      );
 
       if (Platform.OS === 'web') {
-        window.alert(message);
         router.push('/(tabs)/bookings');
       } else {
         Alert.alert('Booking Confirmed!', message, [
@@ -76,6 +74,7 @@ export default function ProviderDetailScreen() {
         ]);
       }
     } catch (err: any) {
+      toast.failed('Booking Failed', err.message || 'Failed to submit booking request.');
       if (Platform.OS === 'web') {
         window.alert(err.message || 'Failed to submit booking request.');
       } else {

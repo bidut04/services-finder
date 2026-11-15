@@ -25,6 +25,7 @@ import {
   SmoothScreenWrapper,
   useScreenTransition,
 } from '../../src/core/animations/SmoothScreenWrapper';
+import { toast } from '../../src/core/components/Toast';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -43,37 +44,45 @@ export default function LoginScreen() {
 
     if (isSignUp) {
       if (!name.trim()) {
-        alert('Please enter your name.');
+        toast.warn('Name Required', 'Please enter your full name to create an account.');
         return;
       }
       if (phone.replace(/\D/g, '').length < 10) {
-        alert('Please enter a valid 10-digit mobile number.');
+        toast.warn('Invalid Mobile', 'Please enter a valid 10-digit mobile number.');
         return;
       }
       if (password.length < 6) {
-        alert('Password must be at least 6 characters.');
+        toast.warn('Password Too Short', 'Password must be at least 6 characters.');
         return;
       }
       if (password !== confirmPassword) {
-        alert('Passwords do not match.');
+        toast.warn('Password Mismatch', 'Confirm password does not match.');
         return;
       }
       const success = await register(name, phone, password);
       if (success) {
+        toast.success('Account Created', `Welcome to HelpNear, ${name}!`);
         navigateWithExit(() => router.push('/(location)/permission'));
+      } else {
+        const currentErr = useAuthStore.getState().error;
+        toast.failed('Registration Failed', currentErr || 'Unable to register. Please check your credentials.');
       }
     } else {
       if (!phone.trim()) {
-        alert('Please enter your mobile number.');
+        toast.warn('Phone Required', 'Please enter your registered mobile number.');
         return;
       }
       if (!password) {
-        alert('Please enter your password.');
+        toast.warn('Password Required', 'Please enter your password to sign in.');
         return;
       }
       const success = await login(phone, password);
       if (success) {
+        toast.success('Signed In Successfully', 'Welcome back to HelpNear!');
         navigateWithExit(() => router.push('/(location)/permission'));
+      } else {
+        const currentErr = useAuthStore.getState().error;
+        toast.failed('Login Failed', currentErr || 'Invalid mobile number or password.');
       }
     }
   };
@@ -158,14 +167,6 @@ export default function LoginScreen() {
                     </TouchableOpacity>
                   </View>
                 </ScrubberItem>
-
-                {/* Error Banner */}
-                {error ? (
-                  <View style={styles.errorBox}>
-                    <Ionicons name="alert-circle" size={18} color={Colors.emergency} />
-                    <Text style={styles.errorText}>{error}</Text>
-                  </View>
-                ) : null}
 
                 {/* Form Fields */}
                 <ScrubberItem index={3} slideDistance={20}>

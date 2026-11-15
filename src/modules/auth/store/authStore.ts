@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { AuthState } from '../types/auth.types';
 import { AuthService } from '../services/authService';
 import { eventMessenger } from '../../../core/components/EventMessenger';
+import { toast } from '../../../core/components/Toast';
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
@@ -91,6 +92,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       hasCompletedLocationFlow: false,
       error: null,
     });
+    toast.info('Signed Out', 'You have been signed out of your account.');
   },
 
   setLocationFlowCompleted: (completed: boolean) => {
