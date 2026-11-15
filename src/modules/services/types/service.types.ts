@@ -16,4 +16,7 @@ export interface PopularServiceItem {
   reviews: number;
   price: string;
   imageUrl: any;
+  category?: string;
+  hourlyRate?: number;
+  location?: string;
 }

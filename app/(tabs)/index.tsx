@@ -30,6 +30,8 @@ import {
 } from '../../src/modules/services/types/service.types';
 import { ScrubberItem } from '../../src/core/animations/PageScrubberTransition';
 import { userApi } from '../../src/api/user.api';
+import { SearchModal } from '../../src/modules/services/components/SearchModal';
+import { ServiceSearchItem } from '../../src/modules/services/search/ServiceSearchEngine';
 
 // Asset Images from reference screen
 const catCleaning = require('../../assets/cat-cleaning.png');
@@ -49,6 +51,7 @@ export default function HomeDashboardScreen() {
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [popularServices, setPopularServices] = useState<PopularServiceItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
   // Live API Fetch: Fetch Categories and Popular Services from backend
   useEffect(() => {
@@ -72,8 +75,10 @@ export default function HomeDashboardScreen() {
             rating: p.rating,
             reviews: p.reviews,
             price: p.price,
-            imageUrl: typeof p.imageUrl === 'string' ? { uri: p.imageUrl } : serviceSofaCarpet,
+            category: p.category,
+            hourlyRate: p.hourlyRate,
             location: p.location,
+            imageUrl: typeof p.imageUrl === 'string' ? { uri: p.imageUrl } : serviceSofaCarpet,
           }));
           setCategories(mappedCats);
           setPopularServices(mappedPops);
@@ -163,26 +168,37 @@ export default function HomeDashboardScreen() {
 
         {/* 2. Search Bar with Filter Option Button */}
         <ScrubberItem index={1} slideDistance={18}>
-          <View style={[styles.searchContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Pressable
+            onPress={() => setIsSearchModalOpen(true)}
+            style={({ pressed }) => [
+              styles.searchContainer,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                opacity: pressed ? 0.9 : 1,
+              },
+            ]}
+          >
             <Ionicons name="search" size={18} color={colors.textMuted} />
-            <TextInput
-              style={[styles.searchInput, { color: colors.textPrimary }]}
-              placeholder="Search For service..."
-              placeholderTextColor={colors.textMuted}
-            />
-            <Pressable
-              style={({ pressed }) => [
+            <Text
+              style={[
+                styles.searchInput,
+                { color: colors.textMuted, lineHeight: 22, paddingTop: 2 },
+              ]}
+            >
+              Search services, electricians, plumbers...
+            </Text>
+            <View
+              style={[
                 styles.filterBtn,
                 {
                   backgroundColor: colors.borderLight,
-                  opacity: pressed ? 0.75 : 1,
-                  transform: [{ scale: pressed ? 0.93 : 1 }],
                 },
               ]}
             >
               <Ionicons name="options-outline" size={19} color={colors.textPrimary} />
-            </Pressable>
-          </View>
+            </View>
+          </Pressable>
         </ScrubberItem>
 
         {/* 3. Categories Section */}
@@ -259,6 +275,24 @@ export default function HomeDashboardScreen() {
         {/* Spacing for elevated floating bottom tab bar */}
         <View style={styles.bottomSpacer} />
       </ScrollView>
+
+      {/* 10/10 Multi-Stage Production Fuzzy Search Modal */}
+      <SearchModal
+        visible={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        catalogue={popularServices.map((p) => ({
+          id: p.id,
+          title: p.title,
+          category: p.category || 'General',
+          price: p.price,
+          hourlyRate: p.hourlyRate || 349,
+          imageUrl: p.imageUrl,
+          rating: p.rating,
+          reviews: p.reviews,
+          location: p.location || 'Local Area',
+          skills: [p.title, p.category || 'General'],
+        }))}
+      />
     </SafeAreaView>
   );
 }

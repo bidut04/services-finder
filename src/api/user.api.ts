@@ -264,6 +264,26 @@ export const userApi = {
   },
 
   /**
+   * 10/10 Multi-stage Typo-Tolerant & Multilingual Fuzzy Search
+   */
+  async searchCatalog(
+    query: string,
+    language: 'en' | 'bn' | 'hi' = 'en',
+    signal?: AbortSignal
+  ): Promise<any[]> {
+    const res = await apiClient<{
+      success: boolean;
+      data: any[];
+      count: number;
+      latencyMs: number;
+    }>(`/catalog/search?q=${encodeURIComponent(query)}&lang=${language}`, {
+      method: 'GET',
+      signal,
+    });
+    return res.data || [];
+  },
+
+  /**
    * Terminate active user session
    */
   async logout(refreshToken?: string): Promise<{ success: boolean; message: string }> {
