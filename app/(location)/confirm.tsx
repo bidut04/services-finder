@@ -25,6 +25,8 @@ import {
   useScreenTransition,
 } from '../../src/core/animations/SmoothScreenWrapper';
 
+import { SavedAddressService } from '../../src/modules/location/services/SavedAddressService';
+
 export default function ConfirmLocationScreen() {
   const router = useRouter();
   const { selectedAddress, savedAddresses, selectManualAddress } =
@@ -50,6 +52,9 @@ export default function ConfirmLocationScreen() {
   const handleConfirmLocation = () => {
     selectManualAddress(activeAddress);
     setLocationFlowCompleted(true);
+    SavedAddressService.saveAddress(activeAddress).catch((err) =>
+      console.warn('[Address Save Warning]:', err.message)
+    );
     navigateWithExit(() => router.replace('/(tabs)'));
   };
 

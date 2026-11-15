@@ -8,6 +8,7 @@ import {
 } from '../src/core/animations/SmoothScreenWrapper';
 import { useLocationStore } from '../src/modules/location/store/locationStore';
 import { useTheme } from '../src/core/theme/themeStore';
+import { userApi } from '../src/api/user.api';
 
 export default function ProviderDetailScreen() {
   const router = useRouter();
@@ -34,22 +35,44 @@ export default function ProviderDetailScreen() {
     navigateWithExit(() => router.back());
   };
 
-  const handleBookNow = (selectedServices: string[]) => {
-    const serviceName = params.title || 'Plumbing Service';
-    const message = `Booking initiated for ${serviceName} (${selectedServices.join(
-      ', '
-    )}) at ${params.price || '$32.00/hr'}.`;
+  const handleBookNow = async (selectedServices: string[]) => {
+    const serviceName = params.title || 'Home Service';
+    const numPrice = parseFloat((params.price || '499').replace(/[^0-9.]/g, '')) || 499;
 
-    if (Platform.OS === 'web') {
-      window.alert(message);
-    } else {
-      Alert.alert('Booking Request Sent', message, [
-        {
-          text: 'View Bookings',
-          onPress: () => router.push('/(tabs)/bookings'),
-        },
-        { text: 'OK', style: 'cancel' },
-      ]);
+    try {
+      const res = await userApi.createBooking({
+        categoryId: 'cat_cleaning',
+        addressId: selectedAddress?.id || 'addr_default',
+        problemDescription: `Customer booked: ${serviceName} (${selectedServices.join(', ')})`,
+        estimatedTotal: numPrice,
+        items: (selectedServices.length > 0 ? selectedServices : [serviceName]).map((s, idx) => ({
+          skillId: `sk_${idx}`,
+          title: s,
+          quantity: 1,
+          unitPrice: numPrice / (selectedServices.length || 1),
+          totalPrice: numPrice / (selectedServices.length || 1),
+        })),
+      });
+
+      const message = `Booking confirmed! Reference: ${res.booking.bookingCode}. A nearby partner has been assigned.`;
+
+      if (Platform.OS === 'web') {
+        window.alert(message);
+        router.push('/(tabs)/bookings');
+      } else {
+        Alert.alert('Booking Confirmed!', message, [
+          {
+            text: 'View My Bookings',
+            onPress: () => router.push('/(tabs)/bookings'),
+          },
+        ]);
+      }
+    } catch (err: any) {
+      if (Platform.OS === 'web') {
+        window.alert(err.message || 'Failed to submit booking request.');
+      } else {
+        Alert.alert('Booking Error', err.message || 'Failed to submit booking request.');
+      }
     }
   };
 

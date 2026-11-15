@@ -14,13 +14,11 @@ export interface AuthState {
   isLoading: boolean;
   error: string | null;
   hasCompletedLocationFlow: boolean;
-  pendingPhoneNumber: string | null;
 
-  // Actions
-  sendOtp: (phoneNumber: string) => Promise<boolean>;
-  verifyOtp: (code: string) => Promise<boolean>;
+  // Actions (Username/Phone & Password - NO OTP)
+  login: (identifier: string, password: string) => Promise<boolean>;
+  register: (name: string, phoneNumber: string, password: string, email?: string) => Promise<boolean>;
   logout: () => void;
   setLocationFlowCompleted: (completed: boolean) => void;
   clearError: () => void;
 }
-

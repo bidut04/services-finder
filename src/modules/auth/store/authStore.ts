@@ -2,50 +2,49 @@ import { create } from 'zustand';
 import { AuthState } from '../types/auth.types';
 import { AuthService } from '../services/authService';
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
   isAuthenticated: false,
   isLoading: false,
   error: null,
   hasCompletedLocationFlow: false,
-  pendingPhoneNumber: null,
 
-  sendOtp: async (phoneNumber: string): Promise<boolean> => {
+  login: async (identifier: string, password: string): Promise<boolean> => {
     set({ isLoading: true, error: null });
     try {
-      await AuthService.sendOtp(phoneNumber);
-      set({ pendingPhoneNumber: phoneNumber, isLoading: false });
-      return true;
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to send OTP';
-      set({ error: errorMessage, isLoading: false });
-      return false;
-    }
-  },
-
-  verifyOtp: async (code: string): Promise<boolean> => {
-    const { pendingPhoneNumber } = get();
-    if (!pendingPhoneNumber) {
-      set({ error: 'Session expired. Please request OTP again.' });
-      return false;
-    }
-
-    set({ isLoading: true, error: null });
-    try {
-      const response = await AuthService.verifyOtp(pendingPhoneNumber, code);
+      const response = await AuthService.login(identifier, password);
       set({
         user: response.user,
         token: response.token,
         isAuthenticated: true,
         isLoading: false,
-        hasCompletedLocationFlow: false, // Ensure location flow is forced immediately after login!
+        hasCompletedLocationFlow: false,
       });
       return true;
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'Invalid OTP entered.';
+        err instanceof Error ? err.message : 'Login failed. Please check your credentials.';
+      set({ error: errorMessage, isLoading: false });
+      return false;
+    }
+  },
+
+  register: async (name: string, phoneNumber: string, password: string, email?: string): Promise<boolean> => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await AuthService.register({ name, phoneNumber, password, email });
+      set({
+        user: response.user,
+        token: response.token,
+        isAuthenticated: true,
+        isLoading: false,
+        hasCompletedLocationFlow: false,
+      });
+      return true;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Registration failed. Please try again.';
       set({ error: errorMessage, isLoading: false });
       return false;
     }
@@ -57,7 +56,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       token: null,
       isAuthenticated: false,
       hasCompletedLocationFlow: false,
-      pendingPhoneNumber: null,
       error: null,
     });
   },
@@ -70,4 +68,3 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ error: null });
   },
 }));
-

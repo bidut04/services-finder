@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
+  ActivityIndicator,
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -27,6 +28,7 @@ import {
   PopularServiceItem,
 } from '../../src/modules/services/types/service.types';
 import { ScrubberItem } from '../../src/core/animations/PageScrubberTransition';
+import { userApi } from '../../src/api/user.api';
 
 // Asset Images from reference screen
 const catCleaning = require('../../assets/cat-cleaning.png');
@@ -42,71 +44,53 @@ export default function HomeDashboardScreen() {
   const { selectedAddress } = useLocationStore();
   const { user } = useAuthStore();
   const { isDark, colors } = useTheme();
-  const [selectedCategory, setSelectedCategory] = useState('Cleaning');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
+  const [popularServices, setPopularServices] = useState<PopularServiceItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Categories matching reference design with photos
-  const homeCategories: ServiceCategory[] = [
-    {
-      id: '1',
-      name: 'Cleaning',
-      icon: 'sparkles',
-      image: catCleaning,
-    },
-    {
-      id: '2',
-      name: 'Plumbing',
-      icon: 'water',
-      image: catPlumbing,
-    },
-    {
-      id: '3',
-      name: 'Electrical',
-      icon: 'flash',
-      image: catElectrical,
-    },
-    {
-      id: '4',
-      name: 'Painting',
-      icon: 'color-palette',
-      image: catPainting,
-    },
-    {
-      id: '5',
-      name: 'Carpentry',
-      icon: 'hammer',
-      image:
-        'https://images.unsplash.com/photo-1588854337236-6889d631faa8?auto=format&fit=crop&w=150&q=80',
-    },
-  ];
-
-  // Popular Services with matching photos & pricing
-  const popularServices: PopularServiceItem[] = [
-    {
-      id: 'p1',
-      title: 'Sofa Carpet clean',
-      rating: 4.9,
-      reviews: 142,
-      price: '$29/hr',
-      imageUrl: serviceSofaCarpet,
-    },
-    {
-      id: 'p2',
-      title: 'Kitchen Service',
-      rating: 4.8,
-      reviews: 98,
-      price: '$35/hr',
-      imageUrl: serviceHomeClean,
-    },
-    {
-      id: 'p3',
-      title: 'AC Gas Refill & Service',
-      rating: 4.7,
-      reviews: 210,
-      price: '$25/hr',
-      imageUrl:
-        'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=300&q=80',
-    },
-  ];
+  // Live API Fetch: Fetch Categories and Popular Services from backend
+  useEffect(() => {
+    let isMounted = true;
+    async function loadCatalog() {
+      try {
+        const [cats, pops] = await Promise.all([
+          userApi.getCategories(),
+          userApi.getPopularServices(),
+        ]);
+        if (isMounted) {
+          const mappedCats: ServiceCategory[] = (cats || []).map((c) => ({
+            id: c.id,
+            name: c.name,
+            icon: (c.icon || 'sparkles') as any,
+            image: c.imageUrl ? { uri: c.imageUrl } : catCleaning,
+          }));
+          const mappedPops: PopularServiceItem[] = (pops || []).map((p) => ({
+            id: p.id,
+            title: p.title,
+            rating: p.rating,
+            reviews: p.reviews,
+            price: p.price,
+            imageUrl: typeof p.imageUrl === 'string' ? { uri: p.imageUrl } : serviceSofaCarpet,
+            location: p.location,
+          }));
+          setCategories(mappedCats);
+          setPopularServices(mappedPops);
+          if (mappedCats.length > 0 && !selectedCategory) {
+            setSelectedCategory(mappedCats[0].name);
+          }
+        }
+      } catch (err: any) {
+        console.warn('[HomeCatalog Fetch Error]:', err.message);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+    loadCatalog();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const cityName = selectedAddress?.city || 'Daspur';
   const stateName = selectedAddress?.state || 'Paschim Medinipur';
@@ -189,7 +173,7 @@ export default function HomeDashboardScreen() {
           </View>
 
           <CategoryList
-            categories={homeCategories}
+            categories={categories}
             selectedCategory={selectedCategory}
             onSelectCategory={(cat) => setSelectedCategory(cat.name)}
             accentColor={colors.primary}

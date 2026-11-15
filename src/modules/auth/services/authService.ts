@@ -1,11 +1,7 @@
+import { userApi } from '../../../api/user.api';
 import { UserProfile } from '../types/auth.types';
 
-export interface SendOtpResponse {
-  success: boolean;
-  message: string;
-}
-
-export interface VerifyOtpResponse {
+export interface AuthResult {
   success: boolean;
   token: string;
   user: UserProfile;
@@ -13,47 +9,79 @@ export interface VerifyOtpResponse {
 
 export class AuthService {
   /**
-   * Sends an OTP to the given phone number
+   * Log in with mobile number (or email) and password
    */
-  public static async sendOtp(phoneNumber: string): Promise<SendOtpResponse> {
-    // Simulating network delay for realistic experience
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    if (!phoneNumber || phoneNumber.length < 10) {
-      throw new Error('Please enter a valid 10-digit mobile number.');
+  public static async login(identifier: string, password: string): Promise<AuthResult> {
+    if (!identifier || identifier.trim().length < 3) {
+      throw new Error('Please enter your mobile number or email.');
+    }
+    if (!password || password.length < 6) {
+      throw new Error('Password must be at least 6 characters.');
     }
 
+    const cleanIdentifier = identifier.trim();
+    const res = await userApi.login({ identifier: cleanIdentifier, password });
+
     return {
-      success: true,
-      message: 'OTP has been dispatched to your mobile number.',
+      success: res.success,
+      token: res.token,
+      user: {
+        id: res.user.id,
+        name: res.user.name || 'HelpNear Customer',
+        phoneNumber: res.user.phoneNumber,
+        email: res.user.email,
+        avatarUrl:
+          res.user.avatarUrl ||
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
+        createdAt: (res.user as any).createdAt || new Date().toISOString(),
+      },
     };
   }
 
   /**
-   * Verifies the 4-digit/6-digit OTP code
+   * Register a new customer with Name, Phone and Password
    */
-  public static async verifyOtp(
-    phoneNumber: string,
-    otpCode: string
-  ): Promise<VerifyOtpResponse> {
-    await new Promise((resolve) => setTimeout(resolve, 900));
-
-    // For testing/development, accept 1234 or any 4 digits
-    if (!otpCode || otpCode.length !== 4) {
-      throw new Error('Please enter a valid 4-digit OTP.');
+  public static async register(data: {
+    name: string;
+    phoneNumber: string;
+    password: string;
+    email?: string;
+  }): Promise<AuthResult> {
+    if (!data.name || data.name.trim().length < 2) {
+      throw new Error('Please enter your full name.');
+    }
+    const cleanPhone = data.phoneNumber.replace(/\D/g, '');
+    if (cleanPhone.length < 10) {
+      throw new Error('Please enter a valid 10-digit mobile number.');
+    }
+    if (!data.password || data.password.length < 6) {
+      throw new Error('Password must be at least 6 characters.');
     }
 
+    const res = await userApi.register({
+      name: data.name.trim(),
+      phoneNumber: cleanPhone,
+      password: data.password,
+      email: data.email,
+    });
+
     return {
-      success: true,
-      token: 'jwt-mock-token-secure-helpnear-001',
+      success: res.success,
+      token: res.token,
       user: {
-        id: 'usr_palash_9921',
-        name: 'Palash',
-        phoneNumber,
-        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
-        createdAt: new Date().toISOString(),
+        id: res.user.id,
+        name: res.user.name || data.name.trim(),
+        phoneNumber: res.user.phoneNumber,
+        email: res.user.email,
+        avatarUrl:
+          res.user.avatarUrl ||
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
+        createdAt: (res.user as any).createdAt || new Date().toISOString(),
       },
     };
   }
-}
 
+  public static async logout(refreshToken?: string): Promise<void> {
+    await userApi.logout(refreshToken);
+  }
+}
