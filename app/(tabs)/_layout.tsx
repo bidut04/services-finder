@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -37,6 +37,7 @@ const TABS_META: Record<string, TabMeta> = {
 };
 
 function WhatsAppBottomTabBar({ state, descriptors, navigation }: any) {
+  const router = useRouter();
   const { isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -61,19 +62,26 @@ function WhatsAppBottomTabBar({ state, descriptors, navigation }: any) {
         };
 
         const onPress = () => {
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-          });
+          const event = navigation?.emit
+            ? navigation.emit({
+                type: 'tabPress',
+                target: route.key,
+                canPreventDefault: true,
+              })
+            : { defaultPrevented: false };
 
-          if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name, route.params);
+          if (!isFocused && !event?.defaultPrevented) {
+            if (navigation?.navigate) {
+              navigation.navigate(route.name, route.params);
+            } else {
+              const targetPath = route.name === 'index' ? '/(tabs)' : `/(tabs)/${route.name}`;
+              router.push(targetPath as any);
+            }
           }
         };
 
         const onLongPress = () => {
-          navigation.emit({
+          navigation?.emit?.({
             type: 'tabLongPress',
             target: route.key,
           });
